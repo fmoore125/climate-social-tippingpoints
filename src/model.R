@@ -36,7 +36,8 @@ model=function(time=1:86,
                evidenceeffect=evidenceeffect1,
                biassedassimilation=biassedassimilation1,
                shiftingbaselines=shiftingbaselines1,
-               year0=2015){
+               year0=2015,
+               natvar=NULL){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -79,7 +80,8 @@ model=function(time=1:86,
   bau_mass=matrix(nrow=length(time),ncol=3)
   bau_mass[1,]=mass_0
   
-  naturalvariability=Re(randomts(gtemp))[1:length(time)]*8
+  if(is.null(natvar)) naturalvariability=Re(randomts(gtemp))[1:length(time)]*8
+  if(!is.null(natvar)) naturalvariability=natvar
   
   weather=numeric(length=length(time))
   weather[1]=temperature[1,1]+naturalvariability[1]
