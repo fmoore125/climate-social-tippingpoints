@@ -32,11 +32,11 @@ Climate->Cognition Cognition->Opinion
 
 <p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$). 
 
-Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Force is directional, with force towards more support for climate police defined as positve and movement away from climate policy defined as negative. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
+Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
 $$\mathbf{Force} = \left[\begin{array}
 {rrr}
-0 & -F_{N} & -F_{S,O} \\
-F_{S,O} & 0 & -F_{S,O} \\
+0 & F_{N} & F_{S,O} \\
+F_{S,O} & 0 & F_{S,O} \\
 F_{S,O} & F_{N} & 0
 \end{array}\right]$$
 
@@ -44,36 +44,61 @@ F_{S,O} & F_{N} & 0
 The force felt by each group depends on the interaction of the force matrix (probability of conversion, conditional on contact) with the social network (probability of contact). The social network is related to the distribution of opinions in the population, but is not entirely determined by it. The network homophily parameter ($\theta$) allows for preferential interaction between opinions of the same type, reflecting that there may be social factors that cause contact / information sharing to disproportionately happen between rather than within groups. In the interests of parsimony, $\theta$ gives the differential probability of encounter with ones own group and it is assumed that other encounters are split equally with the other two groups. Therefore $\theta =\frac{1}{3}$ is a fully mixed population and $\theta =1$ is a fully separated population. 
 
 The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by:
-$$\mathbf{Network} = \left[\begin{array}
+$$\mathbf{Network_{t}} = \left[\begin{array}
 {rrr}
-\theta S & \frac{1-\theta}{2} N & \frac{1-\theta}{2} O \\
-\frac{1-\theta}{2} S & \theta N & \frac{1-\theta}{2} O \\
-\frac{1-\theta}{2} S & \frac{1-\theta}{2} N & \theta O
+\theta S_{t} & \frac{1-\theta}{2} N_{t} & \frac{1-\theta}{2} O_{t} \\
+\frac{1-\theta}{2} S_{t} & \theta N_{t} & \frac{1-\theta}{2} O_{t} \\
+\frac{1-\theta}{2} S_{t} & \frac{1-\theta}{2} N_{t} & \theta O_{t}
 \end{array}\right]$$
 
-The social force is given by $\mathbf{SocialForce}=\mathbf{Network}*\mathbf{Force}$
+The social force is given by $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force}$
 
 In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.
 
 The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
-$$\mathbf{P}=\left[\begin{array}
+$$\mathbf{P_{t}}=\left[\begin{array}
 {rrr}
-(1-(\sum_{j=2,3}\mathbf{SocialForce_{1,j}}-\eta*Ev_{1}) & \sum_{j=2,3}\mathbf{SocialForce_{1,j}}-\eta*Ev_{1} & 0 \\
-\mathbf{SocialForce_{2,1}}+\eta*Ev_{2} & (1-(\sum_{j=1,3}\mathbf{SocialForce_{2,j}}) & \mathbf{SocialForce_{2,1}}-\eta*Ev_{2} \\
-0 &  \sum_{j=1,2}\mathbf{SocialForce_{3,j}}+\eta*Ev_{3} & (1-(\sum_{j=1,2}\mathbf{SocialForce_{3,j}}+\eta*Ev_{3})
+(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}) & \sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1} & 0 \\
+SocialForce_{2,1}+\eta*Ev_{2} & (1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta*Ev_{2} \\
+0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3})
 \end{array}\right]$$
 
 The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
-$$\mathbf{Op_{t}}=
+$$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$
+
+## Policy Component
+
+Collective policy is summarized by a single value, which can be positive or negative, and can be thought of as the magnitude of the tax on carbon emissions (or subsidy of fossil fuels). Policy is cumulative, with the change in policy each period determined by the distribution of opinion and a single "policy responsiveness" parameter, $\nu$.
+
+If the number of supporters is greater than the number of opposers (i.e. $S_{t}>O_{t}$) the the change in policy in period t is given by:
+$$\Delta Policy_{t} = 
+\begin{cases}
+    0 & \text{if } \frac{S_{t}}{O_{t}}<\nu\\
+    (1-N_{t})^{2}*( \frac{S_{t}}{O_{t}}-\nu)^{(1+\frac{1}{\nu})}              &\text{otherwise}
+\end{cases}$$
+
+The policy responsiveness parameter does two things. Firstly it creates a threshold that majorities of opinion must overcome, before they are able to influence policy. Secondly it affects the rate at which policy responds to larger opinion majorities beyond the threshold. At the lower bound of $\nu=1$, simple majorities are enough to effect change and the rate of change is a quadratic in the size of the majoritiy. As $\nu$ increases, the opinion threshold becomes larger and the rate of increase tends towards linear (i.e. $(1+\frac{1}{\nu})\xrightarrow[\nu \to \infty]{} 1$). The population of people without strong opinions on climate policy ($N_{t}$) creates inertia in the policy response, so that the policy response is smaller if a large fraction of people do not have strong opinions about policy.
+
+The functional form with two values of $\nu$ and two values of $N_{t}$ are given below:
+
+```{r, echo=FALSE}
+nu=c(1.25,4)
+Nt=c(0.2,0.8)
+SoverO=seq(1,8,length.out=50)
+policychangefunc=function(maj,nuparam,neutral){
+  return(ifelse(maj<nu,0,(1-neutral)^2*(maj-nu)^(1+1/nu)))
+}
+y1=sapply(SoverO,function(x) policychangefunc(x,nu,Nt[1]))
+y2=sapply(SoverO,function(x) policychangefunc(x,nu,Nt[2]))
+
+plot(SoverO,y1[1,],type="l",lwd=2,las=1,xlab="Ratio of Supporters to Opposers",ylab="Change in Policy",col="#f37619")
+lines(SoverO,y2[1,],lwd=2,lty=3,col="#f37619")
+lines(SoverO,y2[2,],lwd=2,lty=3,col="#1e8b6f")
+lines(SoverO,y1[2,],lwd=2,lty=1,col="#1e8b6f")
+
+legend("topleft",legend=c("Policy Responsiveness=1.25, Neutral=0.2","Policy Responsiveness=1.25, Neutral=0.8","Policy Responsiveness=4, Neutral=0.2","Policy Responsiveness=4, Neutral=0.8"),lty=c(1,3,1,3),col=c("#f37619","#f37619","#1e8b6f","#1e8b6f"),lwd=2,bty="n")
 
 
-
-
-
-
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The formulation is symmetric in the opposite case that $O_{t}>S_{t}$, with the change in policy then being negative rather than positive.
