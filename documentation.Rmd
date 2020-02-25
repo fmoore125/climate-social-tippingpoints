@@ -1,0 +1,64 @@
+---
+title: "Tipping Points in the Climate-Social System, Model Documentation"
+author: "Fran Moore"
+date: "February 21, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo =FALSE,fig.width=10, fig.height = 6)
+library(DiagrammeR)
+```
+
+### Model Overview
+
+<p style="font-size:14pt">There are six primary components in the model, with linkages between components shown below. Opinions about climate policy (*Opinion Component*) determine both individual adoption of emissions-reducing behavior (*Adoption Component*) and collective action (*Policy Component*). Adoption and policy togther determine the level of greenhouse gas emissions (*Emissions Component*), which in turn affect the climate system (*Climate Component*).</p>
+```{r}
+DiagrammeR::grViz("digraph rmarkdown{
+graph [overlap = false, fontsize = 18, layout=circo]
+node [shape = oval,
+        fontname = Helvetica]
+  Opinion; Adoption; Policy; Emissions; Climate; Cognition
+
+Opinion->{Adoption Policy} Policy->Adoption
+Adoption->Emissions Policy->Emissions Emissions->Climate
+Climate->Cognition Cognition->Opinion
+
+}
+")
+```
+
+## Opinion Component
+
+<p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $Op \in {S,N,O}$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$). 
+
+Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
+$$\mathbf{Force} = \left[\begin{array}
+{rrr}
+0 & F_{N} & F_{S,O} \\
+F_{S,O} & 0 & F_{S,O} \\
+F_{S,O} & F_{N} & 0
+\end{array}\right]$$
+
+
+The force felt by each group depends on the interaction of the force matrix (probability of conversion, conditional on contact) with the social network (probability of contact). The social network is related to the distribution of opinions in the population, but is not entirely determined by it. The network homophily parameter ($\theta$) allows for preferential interaction between opinions of the same type, reflecting that there may be social factors that cause contact / information sharing to disproportionately happen between rather than within groups. In the interests of parsimony, $\theta$ gives the differential probability of encounter with ones own group and it is assumed that other encounters are split equally with the other two groups. Therefore $\theta =\frac{1}{3}$ is a fully mixed population and $\theta =1$ is a fully separated population. 
+
+The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by:
+$$\mathbf{Network} = \left[\begin{array}
+{rrr}
+\theta S & \frac{1-\theta}{2} N & \frac{1-\theta}{2} S \\
+\frac{1-\theta}{2} S & \theta N & \frac{1-\theta}{2} O \\
+\frac{1-\theta}{2} S & \frac{1-\theta}{2} N & \theta O
+\end{array}\right]$$
+
+
+
+
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
