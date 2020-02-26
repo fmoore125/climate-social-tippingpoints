@@ -30,9 +30,9 @@ Climate->Cognition Cognition->Opinion
 
 ## Opinion Component
 
-<p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$). 
+<p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$).</p>
 
-Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
+Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
 $$\mathbf{Force} = \left[\begin{array}
 {rrr}
 0 & F_{N} & F_{S,O} \\
@@ -101,4 +101,36 @@ legend("topleft",legend=c("Policy Responsiveness=1.25, Neutral=0.2","Policy Resp
 
 ```
 
-The formulation is symmetric in the opposite case that $O_{t}>S_{t}$, with the change in policy then being negative rather than positive.
+The formulation is symmetric in the opposite case that $O_{t}>S_{t}$, with the change in policy then being negative rather than positive. Policy is limited by an arbitrary maximimum value of 300.
+
+## Adoption Component
+
+Individual behavior to reduce emissions is represented by choice to adopt or not adopt a single sustainable behavior that reduces individual emissions. It can be thought of as a representitive composite of all the actions individuals can take to reduce emissions. The adoption decision is determined by two things: 1) the social norm around adoption / non-adoption determined by the social network for each opinion group and 2) perceived behavioral control, the opposite of adoption costs, which are affected by the total number of adopters, policy, and opinion.
+
+The fraction of adopters within each opinion group is given by the vector $\mathbf A$. The fraction of adopters within the social network of opinion group i is given by:
+
+$$Frac_{i}=\sum_{j=1,2,3} Network_{i,j}*A_{j}$$
+The social norm around adoption felt by members of each opinion group depends on the fraction of network adopting and a "norm effectiveness" scaling parameter ($\lambda$) which determines the strength of the social norm effect:
+$$Norm_{i}=
+\begin{cases}
+   \lambda *(1-4Frac_{i}+4Frac_{i}^{2})  & \text{if } Frac_{i}>0.5\\
+     \lambda *(-1+4Frac_{i}-4Frac_{i}^{2})             &\text{if } Frac_{i}<=0.5
+\end{cases}$$
+
+This functional form has the desireable properties that $Norm_{i}=0$ for $Frac_{i}=0.5$ and that increases in $Frac_{i}$ have a larger effect on the norm towards the extreme values of 0 and 1. The functional form is shown below for two values of $\lambda$:
+```{r, echo=FALSE}
+lambda=c(0.2,0.5)
+frac=seq(0,1,length.out=50)
+normfunction=function(fraction, lam){
+  if(fraction>0.5) norm=lam*(1-4*fraction+4*fraction^2)
+  if(fraction<=0.5) norm=lam*(-1+4*fraction-4*fraction^2)
+  return(norm)
+}
+y=sapply(frac,function(x) normfunction(x,lambda))
+plot(frac,y[2,],type="l",lwd=2,col="#0d2d46",las=1,xlab="Fraction of Adopters in Network",ylab="Norm Effect",xlim=c(0,1))
+lines(frac,y[1,],lwd=2,col="#d8af31")
+abline(h=0,lty=3)
+legend("topleft",legend=c("Lambda=0.2","Lambda=0.5"),lwd=2,col=c("#d8af31","#0d2d46"),bty="")
+
+```
+
