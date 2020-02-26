@@ -47,4 +47,10 @@ vignettes/*.pdf
 # ShinyApps manifest
 *.dcf
 
+# Data folder
+/data/
+
+#Knitted Rmarkdown files
+*.html
+
 # End of https://www.gitignore.io/api/r
