@@ -32,7 +32,7 @@ Climate->Cognition Cognition->Opinion
 
 <p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$).</p>
 
-Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
+<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
 $$\mathbf{Force} = \left[\begin{array}
 {rrr}
 0 & F_{N} & F_{S,O} \\
@@ -41,9 +41,9 @@ F_{S,O} & F_{N} & 0
 \end{array}\right]$$
 
 
-The force felt by each group depends on the interaction of the force matrix (probability of conversion, conditional on contact) with the social network (probability of contact). The social network is related to the distribution of opinions in the population, but is not entirely determined by it. The network homophily parameter ($\theta$) allows for preferential interaction between opinions of the same type, reflecting that there may be social factors that cause contact / information sharing to disproportionately happen between rather than within groups. In the interests of parsimony, $\theta$ gives the differential probability of encounter with ones own group and it is assumed that other encounters are split equally with the other two groups. Therefore $\theta =\frac{1}{3}$ is a fully mixed population and $\theta =1$ is a fully separated population. 
+<p style="font-size:14pt">The force felt by each group depends on the interaction of the force matrix (probability of conversion, conditional on contact) with the social network (probability of contact). The social network is related to the distribution of opinions in the population, but is not entirely determined by it. The network homophily parameter ($\theta$) allows for preferential interaction between opinions of the same type, reflecting that there may be social factors that cause contact / information sharing to disproportionately happen between rather than within groups. In the interests of parsimony, $\theta$ gives the differential probability of encounter with ones own group and it is assumed that other encounters are split equally with the other two groups. Therefore $\theta =\frac{1}{3}$ is a fully mixed population and $\theta =1$ is a fully separated population.</p> 
 
-The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by:
+<p style="font-size:14pt">The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by:</p> 
 $$\mathbf{Network_{t}} = \left[\begin{array}
 {rrr}
 \theta S_{t} & \frac{1-\theta}{2} N_{t} & \frac{1-\theta}{2} O_{t} \\
@@ -114,7 +114,7 @@ The social norm around adoption felt by members of each opinion group depends on
 $$Norm_{i}=
 \begin{cases}
    \lambda *(1-4Frac_{i}+4Frac_{i}^{2})  & \text{if } Frac_{i}>0.5\\
-     \lambda *(-1+4Frac_{i}-4Frac_{i}^{2})             &\text{if } Frac_{i}<=0.5
+     -\lambda *(1-4Frac_{i}+4Frac_{i}^{2})             &\text{if } Frac_{i}<=0.5
 \end{cases}$$
 
 This functional form has the desireable properties that $Norm_{i}=0$ for $Frac_{i}=0.5$ and that increases in $Frac_{i}$ have a larger effect on the norm towards the extreme values of 0 and 1. The functional form is shown below for two values of $\lambda$:
@@ -130,7 +130,44 @@ y=sapply(frac,function(x) normfunction(x,lambda))
 plot(frac,y[2,],type="l",lwd=2,col="#0d2d46",las=1,xlab="Fraction of Adopters in Network",ylab="Norm Effect",xlim=c(0,1))
 lines(frac,y[1,],lwd=2,col="#d8af31")
 abline(h=0,lty=3)
-legend("topleft",legend=c("Lambda=0.2","Lambda=0.5"),lwd=2,col=c("#d8af31","#0d2d46"),bty="")
+legend("topleft",legend=c("Lambda=0.2","Lambda=0.5"),lwd=2,col=c("#d8af31","#0d2d46"),bty="n")
 
 ```
+
+Adoption also depends logistically on perceived behavioural control (pbc). The logistic function giving the fraction of adopters as a function of pbc is determined by 2 parameters, $pbc_{mid}$ which gives the value of pbc with 50% adoption, and $pbc_{steep}$, which controls how steeply adoption responds to changes in pbc away from the midpoint. Opinion about climate change can also affect the adoption curve, by shifting the midpoint of the adoption curve, meaning that the same value of pbc results in different adoption rates in the three different opinion groups. This parameter, $pbc_{shift,i}$ is specific to opinion group. The fraction of adopters in opinion group $i$ in time $t$ is given by:
+$$A_{it}=Norm_{it}+\frac{1}{(1+e^{-pbc_{steep}*(pbc_{t}-(pbc_{mid}-pbc_{shift,i}))})}$$
+
+Example logistic curves for three opinion groups, assuming $Norm_{it}=0$, are shown below:
+
+```{r, echo=FALSE}
+shift=c(-0.3,0,0.3)
+pbcmid=0.5
+pbcsteep=2
+pbc=seq(-2,5,length.out=100)
+adoptionfunc=function(pbcval,shifter,pmid=pbcmid,psteep=pbcsteep){
+  return(1/(1+exp(-psteep*(pbcval-(pmid-shifter)))))
+}
+y=sapply(pbc,function(x) adoptionfunc(x, shift))
+plot(pbc,y[1,]*100,type="l",lwd=2,las=1,xlab="Perceived Behavioral Control",ylab="% Adopters",lty=2,col="#d5505e")
+lines(pbc,y[2,]*100,lwd=2,col="#d5505e")
+lines(pbc,y[3,]*100,lwd=2,col="#d5505e",lty=4)
+legend("topleft",legend=c("Supporters, Shift=0.3","Neutral, Shift=0","Opposers, Shift=-0.3"),lwd=2,lty=c(4,1,2),col="#d5505e",bty="n")
+
+```
+
+
+PBC each time period depends on two things: the total number of adoptioers in the previous time period ($\sum_{i} A_{i,t-1}$) and policy. The effect of number of adopters captures a generic endogenous technical change ($etc$) effect, where more people using a technology lowers the cost for others, through mechanisms such as economies of scale, network effects, and technical or social learning. This is effect is parameterized as a logistic, with three parameters: $etc_{total}$ gives the maximum effect of etc, $etc_{mid}$ gives the number of adopters required for 50% realization of the total etc effect, and $etc_{steep}$ gives the steepness of the response.
+
+PBC at time t is therefore given by:
+$$pbc_{t}=pbc_{0}+\frac{etc_{total}}{(1+e^{-etc_{steep}*(\sum_{i} A_{i,t-1}-etc_{mid})})}+pbc_{pol,t}$$
+
+The term $pbc_{pol,t}$ allows policy to affect adoption costs (pbc), for example by making sustainable options more or less expensive relative to an alternative. This is directional (i.e. positive, emissions-reducing policy raises pbc, increasing adoption while negative policy reduces pbc). This effect is assumed to be linear in policy, up to a maximum policy effect, ($maxpbc_{pol}$):
+$$pbc_{pol,t}=
+\begin{cases}
+    Policy_{t}*0.1 & \text{if } |Policy_{t}*0.1|<maxpbc_{pol}\\
+     maxpbc_{pol}             & \text{if } Policy_{t}*0.1>maxpbc_{pol}\\
+     -maxpbc_{pol} &\text{if } Policy_{t}*0.1<-maxpbc_{pol}
+\end{cases}$$
+
+## Emissions Component
 
