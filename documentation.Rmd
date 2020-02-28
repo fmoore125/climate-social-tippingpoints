@@ -32,50 +32,50 @@ Climate->Cognition Cognition->Opinion
 
 <p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$).</p>
 
-<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:</p>
+<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
 $$\mathbf{Force} = \left[\begin{array}
 {rrr}
 0 & F_{N} & F_{S,O} \\
 F_{S,O} & 0 & F_{S,O} \\
 F_{S,O} & F_{N} & 0
-\end{array}\right]$$
+\end{array}\right]$$</p>
 
 
 <p style="font-size:14pt">The force felt by each group depends on the interaction of the force matrix (probability of conversion, conditional on contact) with the social network (probability of contact). The social network is related to the distribution of opinions in the population, but is not entirely determined by it. The network homophily parameter ($\theta$) allows for preferential interaction between opinions of the same type, reflecting that there may be social factors that cause contact / information sharing to disproportionately happen between rather than within groups. In the interests of parsimony, $\theta$ gives the differential probability of encounter with ones own group and it is assumed that other encounters are split equally with the other two groups. Therefore $\theta =\frac{1}{3}$ is a fully mixed population and $\theta =1$ is a fully separated population.</p> 
 
-<p style="font-size:14pt">The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by:</p> 
+<p style="font-size:14pt">The social network defining probability of intereaction for each group (rows) with each other group (columns) is given by: 
 $$\mathbf{Network_{t}} = \left[\begin{array}
 {rrr}
 \theta S_{t} & \frac{1-\theta}{2} N_{t} & \frac{1-\theta}{2} O_{t} \\
 \frac{1-\theta}{2} S_{t} & \theta N_{t} & \frac{1-\theta}{2} O_{t} \\
 \frac{1-\theta}{2} S_{t} & \frac{1-\theta}{2} N_{t} & \theta O_{t}
-\end{array}\right]$$
+\end{array}\right]$$</p>
 
-<p style="font-size:14pt">The social force is given by</p> $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force}$
+<p style="font-size:14pt">The social force is given by $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force}$</p>
 
 <p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
 
-<p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:</p>
+<p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
 $$\mathbf{P_{t}}=\left[\begin{array}
 {rrr}
 (1-(\sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}) & \sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1} & 0 \\
 SocialForce_{2,1}+\eta*Ev_{2} & (1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta*Ev_{2} \\
 0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3})
-\end{array}\right]$$
+\end{array}\right]$$</p>
 
-<p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:</p>
-$$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$
+<p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
+$$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$</p>
 
 ## Policy Component
 
 <p style="font-size:14pt">Collective policy is summarized by a single value, which can be positive or negative, and can be thought of as the magnitude of the tax on carbon emissions (or subsidy of fossil fuels). Policy is cumulative, with the change in policy each period determined by the distribution of opinion and a single "policy responsiveness" parameter, $\nu$.</p>
 
-<p style="font-size:14pt">If the number of supporters is greater than the number of opposers (i.e. $S_{t}>O_{t}$) the the change in policy in period t is given by:</p>
+<p style="font-size:14pt">If the number of supporters is greater than the number of opposers (i.e. $S_{t}>O_{t}$) the the change in policy in period t is given by:
 $$\Delta Policy_{t} = 
 \begin{cases}
     0 & \text{if } \frac{S_{t}}{O_{t}}<\nu\\
     (1-N_{t})^{2}*( \frac{S_{t}}{O_{t}}-\nu)^{(1+\frac{1}{\nu})}              &\text{otherwise}
-\end{cases}$$
+\end{cases}$$</p>
 
 <p style="font-size:14pt">The policy responsiveness parameter does two things. Firstly it creates a threshold that majorities of opinion must overcome, before they are able to influence policy. Secondly it affects the rate at which policy responds to larger opinion majorities beyond the threshold. At the lower bound of $\nu=1$, simple majorities are enough to effect change and the rate of change is a quadratic in the size of the majoritiy. As $\nu$ increases, the opinion threshold becomes larger and the rate of increase tends towards linear (i.e. $(1+\frac{1}{\nu})\xrightarrow[\nu \to \infty]{} 1$). The population of people without strong opinions on climate policy ($N_{t}$) creates inertia in the policy response, so that the policy response is smaller if a large fraction of people do not have strong opinions about policy.</p>
 
@@ -105,19 +105,18 @@ legend("topleft",legend=c("Policy Responsiveness=1.25, Neutral=0.2","Policy Resp
 
 ## Adoption Component
 
-<p style="font-size:14pt">Individual behavior to reduce emissions is represented by choice to adopt or not adopt a single sustainable behavior that reduces individual emissions. It can be thought of as a representitive composite of all the actions individuals can take to reduce emissions. The adoption decision is determined by two things: 1) the social norm around adoption / non-adoption determined by the social network for each opinion group and 2) perceived behavioral control, the opposite of adoption costs, which are affected by the total number of adopters, policy, and opinion.
+<p style="font-size:14pt">Individual behavior to reduce emissions is represented by choice to adopt or not adopt a single sustainable behavior that reduces individual emissions. It can be thought of as a representitive composite of all the actions individuals can take to reduce emissions. The adoption decision is determined by two things: 1) the social norm around adoption / non-adoption determined by the social network for each opinion group and 2) perceived behavioral control, the opposite of adoption costs, which are affected by the total number of adopters, policy, and opinion.</p>
 
-The fraction of adopters within each opinion group is given by the vector $\mathbf A$. The fraction of adopters within the social network of opinion group i is given by:
-
-$$Frac_{i}=\sum_{j=1,2,3} Network_{i,j}*A_{j}$$
-The social norm around adoption felt by members of each opinion group depends on the fraction of network adopting and a "norm effectiveness" scaling parameter ($\lambda$) which determines the strength of the social norm effect:
+<p style="font-size:14pt">The fraction of adopters within each opinion group is given by the vector $\mathbf A$. The fraction of adopters within the social network of opinion group i is given by:
+$$Frac_{i}=\sum_{j=1,2,3} Network_{i,j}*A_{j}$$</p>
+<p style="font-size:14pt">The social norm around adoption felt by members of each opinion group depends on the fraction of network adopting and a "norm effectiveness" scaling parameter ($\lambda$) which determines the strength of the social norm effect:
 $$Norm_{i}=
 \begin{cases}
    \lambda *(1-4Frac_{i}+4Frac_{i}^{2})  & \text{if } Frac_{i}>0.5\\
      -\lambda *(1-4Frac_{i}+4Frac_{i}^{2})             &\text{if } Frac_{i}<=0.5
-\end{cases}$$
+\end{cases}$$</p>
 
-This functional form has the desireable properties that $Norm_{i}=0$ for $Frac_{i}=0.5$ and that increases in $Frac_{i}$ have a larger effect on the norm towards the extreme values of 0 and 1. The functional form is shown below for two values of $\lambda$:
+<p style="font-size:14pt">This functional form has the desireable properties that $Norm_{i}=0$ for $Frac_{i}=0.5$ and that increases in $Frac_{i}$ have a larger effect on the norm towards the extreme values of 0 and 1. The functional form is shown below for two values of $\lambda$:</p>
 ```{r, echo=FALSE}
 lambda=c(0.2,0.5)
 frac=seq(0,1,length.out=50)
@@ -134,10 +133,10 @@ legend("topleft",legend=c("Lambda=0.2","Lambda=0.5"),lwd=2,col=c("#d8af31","#0d2
 
 ```
 
-Adoption also depends logistically on perceived behavioural control (pbc). The logistic function giving the fraction of adopters as a function of pbc is determined by 2 parameters, $pbc_{mid}$ which gives the value of pbc with 50% adoption, and $pbc_{steep}$, which controls how steeply adoption responds to changes in pbc away from the midpoint. Opinion about climate change can also affect the adoption curve, by shifting the midpoint of the adoption curve, meaning that the same value of pbc results in different adoption rates in the three different opinion groups. This parameter, $pbc_{shift,i}$ is specific to opinion group. The fraction of adopters in opinion group $i$ in time $t$ is given by:
-$$A_{it}=Norm_{it}+\frac{1}{(1+e^{-pbc_{steep}*(pbc_{t}-(pbc_{mid}-pbc_{shift,i}))})}$$
+<p style="font-size:14pt">Adoption also depends logistically on perceived behavioural control (pbc). The logistic function giving the fraction of adopters as a function of pbc is determined by 2 parameters, $pbc_{mid}$ which gives the value of pbc with 50% adoption, and $pbc_{steep}$, which controls how steeply adoption responds to changes in pbc away from the midpoint. Opinion about climate change can also affect the adoption curve, by shifting the midpoint of the adoption curve, meaning that the same value of pbc results in different adoption rates in the three different opinion groups. This parameter, $pbc_{shift,i}$ is specific to opinion group. The fraction of adopters in opinion group $i$ in time $t$ is given by:
+$$A_{it}=Norm_{it}+\frac{1}{(1+e^{-pbc_{steep}*(pbc_{t}-(pbc_{mid}-pbc_{shift,i}))})}$$</p>
 
-Example logistic curves for three opinion groups, assuming $Norm_{it}=0$, are shown below:
+<p style="font-size:14pt">Example logistic curves for three opinion groups, assuming $Norm_{it}=0$, are shown below:</p>
 
 ```{r, echo=FALSE}
 shift=c(-0.3,0,0.3)
@@ -156,12 +155,12 @@ legend("topleft",legend=c("Supporters, Shift=0.3","Neutral, Shift=0","Opposers, 
 ```
 
 
-PBC each time period depends on two things: the total number of adoptioers in the previous time period ($N_{t-1}=\sum_{i} A_{i,t-1}*Op_{i,t-1}$) and policy. The effect of number of adopters captures a generic endogenous technical change ($etc$) effect, where more people using a technology lowers the cost for others, through mechanisms such as economies of scale, network effects, and technical or social learning. This is effect is parameterized as a logistic, with three parameters: $etc_{total}$ gives the maximum effect of etc, $etc_{mid}$ gives the number of adopters required for 50% realization of the total etc effect, and $etc_{steep}$ gives the steepness of the response.
+<p style="font-size:14pt">PBC each time period depends on two things: the total number of adoptioers in the previous time period ($N_{t-1}=\sum_{i} A_{i,t-1}*Op_{i,t-1}$) and policy. The effect of number of adopters captures a generic endogenous technical change ($etc$) effect, where more people using a technology lowers the cost for others, through mechanisms such as economies of scale, network effects, and technical or social learning. This effect is parameterized as a logistic, with three parameters: $etc_{total}$ gives the maximum effect of etc, $etc_{mid}$ gives the number of adopters required for 50% realization of the total etc effect, and $etc_{steep}$ gives the steepness of the response.</p>
 
-PBC at time t is therefore given by:
-$$pbc_{t}=pbc_{0}+\frac{etc_{total}}{(1+e^{-etc_{steep}*(N_{t-1}-etc_{mid})})}+pbc_{pol,t}$$
+<p style="font-size:14pt">PBC at time t is therefore given by:
+$$pbc_{t}=pbc_{0}+\frac{etc_{total}}{(1+e^{-etc_{steep}*(N_{t-1}-etc_{mid})})}+pbc_{pol,t}$$</p>
 
-The term $pbc_{pol,t}$ allows policy to affect adoption costs (pbc), for example by making sustainable options more or less expensive relative to an alternative. This is directional (i.e. positive, emissions-reducing policy raises pbc, increasing adoption while negative policy reduces pbc). This effect is assumed to be linear in policy, up to a maximum policy effect, ($maxpbc_{pol}$):
+<p style="font-size:14pt">The term $pbc_{pol,t}$ allows policy to affect adoption costs (pbc), for example by making sustainable options more or less expensive relative to an alternative. This is directional (i.e. positive, emissions-reducing policy raises pbc, increasing adoption while negative policy reduces pbc). This effect is assumed to be linear in policy, up to a maximum policy effect, ($maxpbc_{pol}$):
 $$pbc_{pol,t}=
 \begin{cases}
     Policy_{t}*0.1 & \text{if } |Policy_{t}*0.1|<maxpbc_{pol}\\
@@ -172,11 +171,11 @@ $$pbc_{pol,t}=
 
 ## Emissions Component
 
-Global emissions in the absence of climate policy (i.e. positive values of $Policy$) are given by RCP 7.0 and are denoted $BAU$. This is a relatively high emissions scenario in which global emissions double by 2100 and warming exceeds $3^{\circ}$ above pre-industrial temperatures by 2100.
+<p style="font-size:14pt">Global emissions in the absence of climate policy (i.e. positive values of $Policy$) are given by RCP 7.0 and are denoted $BAU$. This is a relatively high emissions scenario in which global emissions double by 2100 and warming exceeds $3^{\circ}$ above pre-industrial temperatures by 2100.</p>
 
-Reduction in emissions comes from two sources, adoption of sustainable behaviors by individuals and collective policy action. Individual action is assumed to produce instantaneous emissions reduction, but not to have any persistent (i.e. cumulative) effect. Therefore mitigation resulting from individual adoption of sustainable behaviors in year t is given by $M_{ind,t}=\pi N_{t}$ where $\pi$ is a scalining factor describing the effectiveness in terms of emissions of individual adoption.
+<p style="font-size:14pt">Reduction in emissions comes from two sources, adoption of sustainable behaviors by individuals and collective policy action. Individual action is assumed to produce instantaneous emissions reduction, but not to have any persistent (i.e. cumulative) effect. Therefore mitigation resulting from individual adoption of sustainable behaviors in year t is given by $M_{ind,t}=\pi N_{t}$ where $\pi$ is a scalining factor describing the effectiveness in terms of emissions of individual adoption.</p>
 
-Policy also affects emissions. These emissions reductions are modeled as persistent but not permantent. The effect of policy today on emissions in the future is modeled using an exponential decay function, parameterized using two variables: the contemporaneous effect of policy today on emissions, $M_{pol}$; and the lifetime of contemporaneous investments in mitigation, $r$. Both $m_{pol}$ and $r$ are allowed to increase with increasing policy, reflecting the fact that more stringent climate policy might effect both more emissions reudctions and longer-lasting emissions reduction, in the form of investments on longer-lived infrastructure. The time-path of emissions reductions for two combinations of $M_{pol}$ and $r$ are given below:
+<p style="font-size:14pt">Policy also affects emissions directly. These emissions reductions are modeled as persistent but not permantent. The effect of policy today on emissions in the future is modeled using an exponential decay function, parameterized using two variables: the contemporaneous effect of policy today on emissions, $m$; and the lifetime of contemporaneous investments in mitigation, $r$. Both $m$ and $r$ are allowed to increase with increasing policy, reflecting the fact that more stringent climate policy might effect both more emissions reudctions and longer-lasting emissions reduction, in the form of investments on longer-lived infrastructure. The time-path of emissions reductions for two combinations of $m$ and $r$ are given below:</p>
 ```{r, echo=FALSE}
 m=c(0.02,0.05)
 r=c(10,30)
@@ -189,21 +188,50 @@ time=c(2015,2016,2017,2018,2019,time)
 y=cbind(matrix(rep(0,10),ncol=5),y)
 plot(time,-100*y[2,],type="l",lwd=2,col="coral",xlab="Time",ylab="% Emissions Reduction",las=1)
 lines(time,-100*y[1,],lwd=2,col="seagreen")
-legend("bottomright",bty="n",legend=c("mpol=2%, r=10 years","mpol=5%, r=30 years"),lwd=2,col=c("seagreen","coral"))
+legend("bottomright",bty="n",legend=c("m=2%, r=10 years","m=5%, r=30 years"),lwd=2,col=c("seagreen","coral"))
 ``` 
-Both $m_{pol}$ and $r$ increase with increasing policy. The change in $M_{pol}$ with policy is given by
-$$m_{pol,t}=
+<p style="font-size:14pt">Both $m$ and $r$ increase with increasing policy. The change in $m$ with policy is given by
+$$m_{t}=
 \begin{cases}
-\gamma*(1-log(300-Policy_{t})/log(300)) & \text{it } Policy_{t}<300\\
+\gamma*(1-\frac{log(300-Policy_{t})}{log(300)}) & \text{it } Policy_{t}<300\\
 \gamma & \text{otherwise}
-\end{cases}$$
-Where $\gamma$ is a parameter describing the maximum contemporaneous reduction in emissions and 300 comes from the arbitrary maximum value of $Policy$ (Policy Component). The functional form here reflects an upward-sloping mitigation supply curve, if $Policy$ is interpreted as a carbon price, consistent with standard economic theory and empirical estimates.
+\end{cases}$$</p>
+<p style="font-size:14pt">Where $\gamma$ is a parameter describing the maximum contemporaneous reduction in emissions and 300 comes from the arbitrary maximum value of $Policy$ (Policy Component). The functional form here reflects an upward-sloping mitigation supply curve, if $Policy$ is interpreted as a carbon price, consistent with standard economic theory and empirical estimates.</p>
 
-The half-life of mitigation investment, $r$, is assumed for simplicity to be linear in $policy$ from an initial value, $r_{0}$ to a maximum value, $\delta$:
-$$r_{t}=min(r_{0}*(1+Policy_{t}),\delta)$$
-The policy-induced mitigation in time t is given by the sum of the current effects of mitigation in all previous time periods: 
-$$M_{pol,t}=\sum_{i=1}^{t} m_{pol,i}e^{-(t-i)*r_{i}}$$
-Therefore, emissions in period t are given by:
-$$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$
+<p style="font-size:14pt">The half-life of mitigation investment, $r$, is assumed for simplicity to be linear in $Policy$ from an initial value, $r_{0}$ to a maximum value, $\delta$:
+$$r_{t}=min(r_{0}*(1+Policy_{t}),\delta)$$</p>
+<p style="font-size:14pt">The policy-induced mitigation in time t is given by the sum of the current effects of mitigation in all previous time periods: 
+$$M_{pol,t}=\sum_{i=1}^{t} m_{i}e^{-(t-i)*r_{i}}$$</p>
+<p style="font-size:14pt">Therefore, emissions in period t are given by:
+$$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$</p>
+
+##Climate Component
+
+<p style="font-size:14pt">The climate model is based on the DICE2016 model, annualized using formulas from Cai, Judd and Lontzek (2012). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: ADD REFERENCE</p>
 
 
+## Cognition Component
+
+<p style="font-size:14pt">If $\eta >0$ then experience of climate change is allowed to affect opinion about climate policy. In particular, the climate system provides evidence ($Ev$) in the form of perceived temperature anomalies. Individuals experience temperature anomalies based both on the mean climate state ($\Delta T_{t}$, caluclated in the Climate Component) and a random draw of weather, $w_{t}$. Weather anomlies are centered on zero and are a random realization of a spectral decomposition of a 500-year pre-industrial climate model run. This preserves the temporal dependnce of weather anomalies, capturing natural cycles such as El Nino, which could affect the perception of climate change over short timescales.</p>
+
+<p style="font-size:14pt">Two forms of imperfect cognition are represented: shifting baselines and biassed assimilation. Shifting baselines reflect the fact that the evalutation of temperatures may change over time as older conditions are forgotten. The perceived anomaly is therefore given by:
+$$Anomaly_{t}=\begin{cases}
+\Delta T_{t}+w_{t} & \text{if } Base=Fixed\\
+\Delta T_{t}+w_{t}-\sum_{i=8}^{2} \beta_{i} (\Delta T_{t-i}+w_{t-i}) & \text{if } Base=Shifting
+\end{cases}$$</p>
+<p style="font-size:14pt">In other words, in the absence of shifting baselines, the perceived anomaly is simply experienced change in weather since pre-industrial. If baselines shift, however, the anomlay is perceived only relative to a baseline based on a weighted average of the last 2-8 years, Parameterization of the shifiting baseline, including the window and the weighting of experienced temperatures within that window, comes from Moore et al. (2019).</p>
+
+<p style="font-size:14pt">A biassed assimilation effect is a form of motivated reasoning that allows selective incorporation of evidence into one's beliefs. This is modeled by allowing temperature anomalies to constitute different levels of evidence ($Ev$) for different opinion groups. The strength of this effect is given by the parameter $\mu$ which up- or down-weights the temperature anomaly, depending on the sign of the anomaly and the opinion group. The effect is fixed at zero for the neutral opinion group.</p> 
+
+<p style="font-size:14pt">Therefore, experiential evidence for climate change for those that already support climate change policy is given by:
+$$Ev_{S,t}=\begin{cases}
+(1+\mu)Anomaly_{t} & \text{if } Anomaly_{t}>0\\
+(1-\mu)Anomaly_{t} & \text{if } Anomaly_{t}<0
+\end{cases}$$</p>
+<p style="font-size:14pt">For those neutral on climate policy $Ev_{N,t}=Anomaly_{t}$, and for those opposing climate policy:
+$$Ev_{O,t}=\begin{cases}
+(1-\mu)Anomaly_{t} & \text{if } Anomaly_{t}>0\\
+(1+\mu)Anomaly_{t} & \text{if } Anomaly_{t}<0
+\end{cases}$$</p>
+
+<p style="font-size:14pt">If $\eta >0$ then this evidence affects opinions about climate policy, as part of the Opinions Component.</p>
