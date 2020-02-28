@@ -3,7 +3,7 @@
 emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0){
   #contemporaneous reduction from policy, depends on policy
   #mitigation_t_1 is a matrix with dimensions of max(t) *t-1 that gives persistent effect of mitigation actions in previous time periods
-  m_t=ifelse(policy_t<=1,0,maxm*log(policy_t)/log(300)) #300 is maximum value policy can take
+  m_t=ifelse(policy_t<=1,0,ifelse(policy_t>=299, maxm,maxm*(1-log(300-policy_t)/log(300)))) #300 is maximum value policy can take
   #lifetime of investments also depends on policy
   r_t=min(r0*(1+policy_t),rmax)
   #add effect of current policy
