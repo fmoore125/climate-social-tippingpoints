@@ -53,7 +53,7 @@ $$\mathbf{Network_{t}} = \left[\begin{array}
 
 <p style="font-size:14pt">The social force is given by $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force}$</p>
 
-<p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
+<p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assimilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
 
 <p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
 $$\mathbf{P_{t}}=\left[\begin{array}
@@ -155,7 +155,7 @@ legend("topleft",legend=c("Supporters, Shift=0.3","Neutral, Shift=0","Opposers, 
 ```
 
 
-<p style="font-size:14pt">PBC each time period depends on two things: the total number of adoptioers in the previous time period ($N_{t-1}=\sum_{i} A_{i,t-1}*Op_{i,t-1}$) and policy. The effect of number of adopters captures a generic endogenous technical change ($etc$) effect, where more people using a technology lowers the cost for others, through mechanisms such as economies of scale, network effects, and technical or social learning. This effect is parameterized as a logistic, with three parameters: $etc_{total}$ gives the maximum effect of etc, $etc_{mid}$ gives the number of adopters required for 50% realization of the total etc effect, and $etc_{steep}$ gives the steepness of the response.</p>
+<p style="font-size:14pt">PBC each time period depends on two things: the total number of adopters in the previous time period ($N_{t-1}=\sum_{i} A_{i,t-1}*Op_{i,t-1}$) and policy. The effect of number of adopters captures a generic endogenous technical change ($etc$) effect, where more people using a technology lowers the cost for others, through mechanisms such as economies of scale, network effects, and technical or social learning. This effect is parameterized as a logistic, with three parameters: $etc_{total}$ gives the maximum effect of etc, $etc_{mid}$ gives the number of adopters required for 50% realization of the total etc effect, and $etc_{steep}$ gives the steepness of the response.</p>
 
 <p style="font-size:14pt">PBC at time t is therefore given by:
 $$pbc_{t}=pbc_{0}+\frac{etc_{total}}{(1+e^{-etc_{steep}*(N_{t-1}-etc_{mid})})}+pbc_{pol,t}$$</p>
@@ -207,7 +207,7 @@ $$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$</p
 
 ##Climate Component
 
-<p style="font-size:14pt">The climate model is based on the DICE2016 model, annualized using formulas from Cai, Judd and Lontzek (2012). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: ADD REFERENCE</p>
+<p style="font-size:14pt">The climate model is based on the DICE2016 model, annualized using formulas from Cai, Judd and Lontzek (2012). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: [Cai, Y., Judd, K., and Lontzek, T. S., 2012. "DSICE: A Dynamic Stochastic Integrated Model of Climate and Economy", RDCEP Working Paper No 12-02](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1992674)</p>
 
 
 ## Cognition Component
