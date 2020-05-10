@@ -1,9 +1,17 @@
 #emissions depend on bau emissions, adoption of individual actions, and policy
 
-emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0){
+emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param){
   #contemporaneous reduction from policy, depends on policy
   #mitigation_t_1 is a matrix with dimensions of max(t) *t-1 that gives persistent effect of mitigation actions in previous time periods
-  m_t=ifelse(policy_t<=1,0,ifelse(policy_t>=299, maxm,maxm*(1-log(300-policy_t)/log(300)))) #300 is maximum value policy can take
+  #lbd param is a "learning by doing" parameter giving the fraction reduction in cost for a doubling of installed mitigation stock
+  
+  #caluclate current emissions reduction cap based on m_max, learning by doing (lbd param) and cumulative mitigation
+  cummit_t_1=sum(mitigation[t-1,1:(t-1)]) #cumulative policy-induced mitigation in previous time period
+  doublings=log2(cummit_t_1/maxm) #number of doublings of total mitigation from initial maximum value
+  mmax_t=ifelse(doublings<=1,maxm,maxm*(1+lbd)^doublings)
+  
+  
+  m_t=ifelse(policy_t<=1,0,ifelse(policy_t>=299, mmax_t,mmax_t*(1-log(300-policy_t)/log(300)))) #300 is maximum value policy can take
   #lifetime of investments also depends on policy
   r_t=min(r0*(1+policy_t),rmax)
   #add effect of current policy

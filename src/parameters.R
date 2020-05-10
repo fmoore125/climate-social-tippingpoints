@@ -101,6 +101,12 @@ bau1=emissions[,2]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to 
 #m assympototes to this value
 m_max1=0.05
 
+#this parameter captures learning by doing (lbd) for policy-induced mitigation
+#it gives the fractional decrease in cost for each doubling of installed mitigation capacity, relative to the initial maximum value (i.e. m_max1)
+#a value of 0 implies no learning by doing, a value of 0.1 implies a 10% reduction in cost for each doubling.
+#values from a review by Rubin et al in Energy Policy suggest a range of 0 - 0.3
+lbd_param01=0.1
+
 #policy also increases the duration of mitigation measures, thorugh increasingly large investments to long-lived capital
 #r is the scaling time of the mitigation investment, policy increases this linearly up to a maximum
 #r_max is a value in years describing the maximum scaling time - should be similar to turnover of capital stock - can take values>1

@@ -38,7 +38,8 @@ model=function(time=1:86,
                shiftingbaselines=shiftingbaselines1,
                year0=2015,
                natvar=NULL,
-               policyopinionfeedback_param=policyopinionfeedback_01){
+               policyopinionfeedback_param=policyopinionfeedback_01,
+               lbd_param=lbd_param01){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -102,7 +103,7 @@ model=function(time=1:86,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
-    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0)
+    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
     
