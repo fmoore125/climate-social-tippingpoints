@@ -24,6 +24,11 @@ forceweak1=0.1 #effect of someone with neutral opinions on strong opinions
 #a value of 0.1 means a perceived anomaly of 1 degree will increase the probability of transition toward a more climate-believing state by 0.1
 evidenceeffect1=0.1
 
+#this parameter governs the feedback from policy to opinion e.g. via the institutional signalling of norms. 
+#a value of 0 turns this feebdack off so that opinion does not depend on policy change
+#a value of 0.01 means a policy change of 5 last period increases the probability of supporting climate policy by 0.05
+policyopinionfeedback_01=0.01
+
 
 ###--------Responsiveness of Policy to Opinion Distribution-----------------------
 

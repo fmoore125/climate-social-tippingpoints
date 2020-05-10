@@ -20,7 +20,7 @@ node [shape = oval,
         fontname = Helvetica]
   Opinion; Adoption; Policy; Emissions; Climate; Cognition
 
-Opinion->{Adoption Policy} Policy->Adoption
+Opinion->{Adoption Policy} Policy->{Adoption Opinion}
 Adoption->Emissions Policy->Emissions Emissions->Climate
 Climate->Cognition Cognition->Opinion
 
@@ -30,7 +30,7 @@ Climate->Cognition Cognition->Opinion
 
 ## Opinion Component
 
-<p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by two things: a social pressure or persuasive force based on interactions between groups ($Force$) and evidence derived from one's own experience of weather ($Ev$).</p>
+<p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by up to three things: a social pressure or persuasive force based on interactions between groups given the group network structure ($Force$), evidence derived from one's own experience of weather ($Ev$), and a feedback from policy to opinion driven by individuals updating their information about the social norm based on institutiona (i.e. policy) change ($PolOp$).</p>
 
 <p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
 $$\mathbf{Force} = \left[\begin{array}
@@ -55,12 +55,17 @@ $$\mathbf{Network_{t}} = \left[\begin{array}
 
 <p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assimilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
 
+<p style="font-size:14pt">Finally, we also allow for a feedback where changing policy can influence opinion by providing evidence on the population-wide norm (as oppposed to the norm experienced by individuals which depends on the social network). Evidence for the existence of this effect is not particularly strong (Tankard and Paluck, 2016), but it constitutes a potentially important feedback mechanism. The strenght of this effect depends on the change in policy last period ($\Delta Policy_{t-1}$) and a scaling parameter $\kappa$:
+$$PolOp_{t}=\kappa \Delta Policy_{t-1}$$</p>
+<p style="font-size:14pt">Note that this effect is the same for all opinion groups and that the sign can be either positive or negative, depending on whether the policy change last period increased (positive) or decreased (negative) pro-climate policies.</p>
+
+
 <p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
 $$\mathbf{P_{t}}=\left[\begin{array}
 {rrr}
-(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}) & \sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1} & 0 \\
-SocialForce_{2,1}+\eta*Ev_{2} & (1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta*Ev_{2} \\
-0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3})
+(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}-PolOp) & \sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}-PolOp & 0 \\
+SocialForce_{2,1}+\eta*Ev_{2}+PolOp & (1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta*Ev_{2}-PolOp \\
+0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3}+PolOp & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3}+PolOp)
 \end{array}\right]$$</p>
 
 <p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
