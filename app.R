@@ -19,6 +19,8 @@ ui <- fluidPage(
       sliderInput("forcestrong", "Persuasive Force from Opinionated - min=0 (no effect), max=1 (instant persuasion)", 0.2, min = 0, max = 1, step = 0.05),
       sliderInput("forceweak", "Persuasive Force from Neutral - min=0 (no effect), max=Force from Opinionated", 0.1, min = 0, max = 1, step = 0.05),
       sliderInput("evidenceeffect","Effect of Perceived Weather on Opinion min=0 (no effect), max=0.5 (large effect)",0,min=0,max=0.5,step=0.1),
+      sliderInput("policyopinionfeedback_param","Effect of Policy on Opinion min=0 (no effect), max=0.01 (large effect)",0,min=0,max=0.01,step=0.001),
+      
       
       
       h2("Policy Response Parameters"),
@@ -28,7 +30,7 @@ ui <- fluidPage(
       h3("Perceived Behavioral Control"),
       sliderInput("pbc_mid", "PBC Value at 50% Adoption - Starting Value PBC=-1.5, Higher Values => Later Adoption", 0, min = -1, max = 5, step = 0.5),
       sliderInput("pbc_steep", "PBC Adoption Steepness - min=1 (gradual), max=5 (steep)", 3, min = 1, max = 5, step = 0.5),
-      sliderInput("policy_pbcchange_max", "Max Effect of Policy on PBC Curve - min=0 (no effect), max=1 (large effect)", 0.5, min = 0, max = 1, step = 0.1),
+      sliderInput("policy_pbcchange_max", "Max Effect of Policy on PBC Curve - min=0 (no effect), max=1 (large effect)", 0.5, min = 0, max = 1, step = 0.1)
       )),
       
       column(2, wellPanel(h3("Opinion and Norm Effect"),
@@ -45,6 +47,8 @@ ui <- fluidPage(
       sliderInput("m_max","Max Contemporaneous Effect of Policy on Emissions (% Reduction) - min=0.1, max=5",2.5,min=0.5,max=5,step=0.5),
       sliderInput("r_max","Max Scaling Time of Mitigation Investments (years, Initial Value=2) - min=5, max=30",25,min=5,max=30,step=1),
       sliderInput("adopt_effect","Effectiveness of Adoption at Reducing Emissions (% Reduction) - min=0 (not effective), max=30",10,min=0,max=30,step=5),
+      sliderInput("lbd_param","Learning By Doing Cost Reduction Effect - min=0 (none), max=25 (25% reduction per doubling)",0,min=0,max=25,step=5),
+      
       
       h2("Cognition"),
       radioButtons("shiftingbaseline","Shifting or Pre-Industrial Baselines?",choices = list("shifting"=1,"fixed"=0),selected=1),
@@ -79,7 +83,8 @@ server <- function(input, output, session) {
                     pbc_mid=input$pbc_mid,pbc_steep=input$pbc_steep,policy_pbcchange_max=input$policy_pbcchange_max,
                     pbc_opinionchange=c(input$oppose_adopt,0,-1*input$support_adopt),normeffect=input$normeffect, etc_mid=input$etc_mid,
                     etc_steep=input$etc_steep,etc_total=input$etc_total,r_max=input$r_max,m_max=input$m_max/100,adopt_effect=input$adopt_effect/100,
-                    evidenceeffect = input$evidenceeffect,biassedassimilation = input$biassedassimilation,shiftingbaseline=input$shiftingbaseline,natvar=natvar1))
+                    evidenceeffect = input$evidenceeffect,biassedassimilation = input$biassedassimilation,shiftingbaseline=input$shiftingbaseline,natvar=natvar1,
+                    policyopinionfeedback_param=input$policyopinionfeedback_param,lbd_param=input$lbd_param/100))
   
   
 

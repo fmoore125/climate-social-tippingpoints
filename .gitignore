@@ -54,3 +54,4 @@ vignettes/*.pdf
 *.html
 
 # End of https://www.gitignore.io/api/r
+.Rproj.user

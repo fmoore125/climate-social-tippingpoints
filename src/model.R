@@ -37,7 +37,9 @@ model=function(time=1:86,
                biassedassimilation=biassedassimilation1,
                shiftingbaselines=shiftingbaselines1,
                year0=2015,
-               natvar=NULL){
+               natvar=NULL,
+               policyopinionfeedback_param=policyopinionfeedback_01,
+               lbd_param=lbd_param01){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -93,7 +95,7 @@ model=function(time=1:86,
   anomaly[1]=ifelse(shiftingbaselines==0,weather[1],naturalvariability[1])
   
   for(t in 2:length(time)){
-    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params)
+    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params,policychange_t_1=ifelse(t==2,0,policy[t-1]-policy[t-2]),policyopinionfeedback=policyopinionfeedback_param)
     policy[t]=policychange(distributions[t,],policy[t-1],responsiveness=pol_response)
     
     temp=adopterschange(nadopters[t-1],adoptersfrac[t-1,],policy[t-1],distributions[t,],etcmid=etc_mid,etcsteep=etc_steep,total=etc_total,init_pbc=pbc_0,maxpolpbc=policy_pbcchange_max,pbcmid=pbc_mid,pbcsteep=pbc_steep,shift=pbc_opinionchange,normstrength=normeffect,selfsimparam=homophily)
@@ -101,7 +103,7 @@ model=function(time=1:86,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
-    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0)
+    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
     

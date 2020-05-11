@@ -24,6 +24,11 @@ forceweak1=0.1 #effect of someone with neutral opinions on strong opinions
 #a value of 0.1 means a perceived anomaly of 1 degree will increase the probability of transition toward a more climate-believing state by 0.1
 evidenceeffect1=0.1
 
+#this parameter governs the feedback from policy to opinion e.g. via the institutional signalling of norms. 
+#a value of 0 turns this feebdack off so that opinion does not depend on policy change
+#a value of 0.01 means a policy change of 5 last period increases the probability of supporting climate policy by 0.05
+policyopinionfeedback_01=0.01
+
 
 ###--------Responsiveness of Policy to Opinion Distribution-----------------------
 
@@ -95,6 +100,12 @@ bau1=emissions[,2]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to 
 #m_max has a value less than one and describes the maximum fraction of emissions that could be cut instantly by policy
 #m assympototes to this value
 m_max1=0.05
+
+#this parameter captures learning by doing (lbd) for policy-induced mitigation
+#it gives the fractional decrease in cost for each doubling of installed mitigation capacity, relative to the initial maximum value (i.e. m_max1)
+#a value of 0 implies no learning by doing, a value of 0.1 implies a 10% reduction in cost for each doubling.
+#values from a review by Rubin et al in Energy Policy suggest a range of 0 - 0.3
+lbd_param01=0.1
 
 #policy also increases the duration of mitigation measures, thorugh increasingly large investments to long-lived capital
 #r is the scaling time of the mitigation investment, policy increases this linearly up to a maximum
