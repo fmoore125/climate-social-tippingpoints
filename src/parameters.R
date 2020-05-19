@@ -11,10 +11,7 @@ frac_neut_01=0.4 #fraction of population neutral at t=0
 #number between 1/3 (no homophily) and 1 (no connection between different groups)
 homophily_param1=0.8
 
-
-
 #effect of contact on opinion - i.e. effect on opinion, conditional on contact
-#diagnoals should be zero - meeting someone with same opinion as you doens't change opinion
 #assume symmetric to avoid parameter explosion
 forcestrong1=0.2 #effect of someone with strong opinions on neutral opinions
 forceweak1=0.1 #effect of someone with neutral opinions on strong opinions
@@ -28,6 +25,12 @@ evidenceeffect1=0.1
 #a value of 0 turns this feebdack off so that opinion does not depend on policy change
 #a value of 0.01 means a policy change of 5 last period increases the probability of supporting climate policy by 0.05
 policyopinionfeedback_01=0.01
+
+#this parameter governs a feedback effect from apoption of sustainable behaviors to opinion about climate change
+#evidence for this effect in the literature is weak, but it is includded here as a parameter to explore, controling a potentially important feedback loop
+#a value of 0 shuts down this feedback
+#a value of 0.01 means adopting sustainable behavior increases the probability of transitioning to opinion more supportive of climate policy by 1pp
+adoptionopinionfeedback_param01=0.05
 
 
 ###--------Responsiveness of Policy to Opinion Distribution-----------------------
@@ -93,13 +96,16 @@ networkfunc=function(distribution=c(frac_opp_0,frac_neut_0,frac_supp_0),selfsimp
 #Emissions depend on bau emissions, adoption of mitigative behaviours, and policy
 
 emissions=read.csv("data/emissions_ssp3_rcp7.csv")
-bau1=emissions[,2]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau_outside1=emissions[,4]/1000*12/(12+16+16)
 
 #more policy increases the contemporaneous effect on emissions and the duration of the effect
 #two parameters describe how the contemporaneous effect changes with policy
 #m_max has a value less than one and describes the maximum fraction of emissions that could be cut instantly by policy
 #m assympototes to this value
 m_max1=0.05
+
+lag_param01=10 #number of years lag from mitigation pathway in OECD to rest of world - set to zero to treat as single region
 
 #this parameter captures learning by doing (lbd) for policy-induced mitigation
 #it gives the fractional decrease in cost for each doubling of installed mitigation capacity, relative to the initial maximum value (i.e. m_max1)
@@ -120,7 +126,7 @@ r_01=2
 adopt_effect1=0.1
 
 ####----------Climate Component --------------------------
-ex_forcing1=emissions[,3]
+ex_forcing1=emissions[,5]
 
 ####----------Cognition Component -------------------------
 #This parameter weights evidence provided by the weather depending on opinions about climate change
