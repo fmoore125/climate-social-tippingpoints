@@ -131,8 +131,8 @@ model=function(time=1:86,
     evidence[t,]=temp5[[2]]
     
   }
-  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions)
-  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau","mass","temp","bau_temp","evidence","anomaly","year","totalemissions")
+  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau+bau_outside_region,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions)
+  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau_total","mass","temp","bau_temp","evidence","anomaly","year","totalemissions")
   
   return(a)
 }

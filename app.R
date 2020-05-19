@@ -48,7 +48,7 @@ ui <- fluidPage(
       sliderInput("r_max","Max Scaling Time of Mitigation Investments (years, Initial Value=2) - min=5, max=30",25,min=5,max=30,step=1),
       sliderInput("adopt_effect","Effectiveness of Adoption at Reducing Emissions (% Reduction) - min=0 (not effective), max=30",10,min=0,max=30,step=5),
       sliderInput("lbd_param","Learning By Doing Cost Reduction Effect - min=0 (none), max=25 (25% reduction per doubling)",0,min=0,max=25,step=5),
-      
+      sliderInput("lag_param","Lag from OECD Mitigation to Rest of World - min=0 (Single Region), max=20 (20 Year Lag)",10,min=0,max=20,step=2),
       
       h2("Cognition"),
       radioButtons("shiftingbaseline","Shifting or Pre-Industrial Baselines?",choices = list("shifting"=1,"fixed"=0),selected=1),
@@ -84,7 +84,7 @@ server <- function(input, output, session) {
                     pbc_opinionchange=c(input$oppose_adopt,0,-1*input$support_adopt),normeffect=input$normeffect, etc_mid=input$etc_mid,
                     etc_steep=input$etc_steep,etc_total=input$etc_total,r_max=input$r_max,m_max=input$m_max/100,adopt_effect=input$adopt_effect/100,
                     evidenceeffect = input$evidenceeffect,biassedassimilation = input$biassedassimilation,shiftingbaseline=input$shiftingbaseline,natvar=natvar1,
-                    policyopinionfeedback_param=input$policyopinionfeedback_param,lbd_param=input$lbd_param/100))
+                    policyopinionfeedback_param=input$policyopinionfeedback_param,lbd_param=input$lbd_param/100,lag_param=input$lag_param))
   
   
 
@@ -118,16 +118,17 @@ server <- function(input, output, session) {
   })
   output$emissionsPlot <- renderPlot({
     mod=m()
-    temp=melt(data.frame(Time=mod$year,Emissions=mod$emissions,BAU=mod$bau),id.vars="Time",variable.name="Scenario",value.name="Emissions")
-    ggplot(temp,aes(x=Time,y=Emissions,group=Scenario,col=Scenario))+geom_line(lwd=2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Emissions (GtC per Year)",x="",y="")+
-      scale_color_manual(values=c("#efbd13","#142c31"),labels=c("Emissions","BAU - RCP7.0"))
+    temp=melt(data.frame(Time=mod$year,Emissions=mod$totalemissions,BAU=mod$bau_total),id.vars="Time",variable.name="Scenario",value.name="Emissions")
+    temp2=melt(data.frame(Time=mod$year,OECD=mod$emissions,OutsideRegion=mod$totalemissions-mod$emissions),id.vars="Time",variable.name="Region",value.name="Emissions")
+    ggplot(temp,aes(x=Time,y=Emissions,col=Scenario))+geom_line(lwd=2)+geom_area(aes(x=Time,y=Emissions,fill=Region),col="black",data=temp2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Emissions (GtC per Year)",x="",y="")+
+      scale_color_manual(values=c("#142c31","#efbd13"),labels=c("Total Emissions","BAU - RCP7.0"))+scale_fill_manual(values=c("#d75939","#2faeb4"),labels=c("OECD","Rest of World"))
     
   })
   output$temperaturePlot <- renderPlot({
     mod=m()
     temp=melt(data.frame(Time=mod$year,Emissions=mod$temp[,1],BAU=mod$bau_temp[,1]),id.vars="Time",variable.name="Scenario",value.name="Temperature")
     ggplot(temp,aes(x=Time,y=Temperature,group=Scenario,col=Scenario))+geom_line(lwd=2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Temperature Change (Degrees Above Pre-Industrial)",x="",y="")+
-      scale_color_manual(values=c("#efbd13","#142c31"),labels=c("Temp Change","BAU Temp Change"))
+      scale_color_manual(values=c("#142c31","#efbd13"),labels=c("Temp Change","BAU Temp Change"))
   })
 }
 

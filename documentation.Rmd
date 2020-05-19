@@ -214,6 +214,10 @@ $$M_{pol,t}=\sum_{i=1}^{t} m_{i}e^{-(t-i)*r_{i}}$$</p>
 <p style="font-size:14pt">Therefore, emissions in period t are given by:
 $$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$</p>
 
+<p style="font-size:14pt">By default, the socio-economic-political-technological dynamics represented in the Opinion, Adoption, Policy, and Emissions components are based on studies from relatively wealthy countries. Accordingly, mitigation rates are applied to the subset of emissions from OECD countries. To simulate global temperatures and therefore the feedback from the climate system to opinion (Congition Component), mitigation rates in the rest of the world also need to be modeled. We model this simply as the lagged mitigation rates in the OCED, parameterized with the lag parameter, $L$, giving the number of years lag:
+$$E_{Tot,t}=E_{t}+BAU_{O,t}*(1-\frac{(BAU_{t-L}-E_{t-L})}{BAU_{t-L}})$$
+Where $BAU_{O,t}$ is business as usual emissions in the outside region. The model can be collapsed to a single-region model by setting $L=0$</p>
+
 ##Climate Component
 
 <p style="font-size:14pt">The climate model is based on the DICE2016 model, annualized using formulas from Cai, Judd and Lontzek (2012). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: [Cai, Y., Judd, K., and Lontzek, T. S., 2012. "DSICE: A Dynamic Stochastic Integrated Model of Climate and Economy", RDCEP Working Paper No 12-02](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1992674)</p>
