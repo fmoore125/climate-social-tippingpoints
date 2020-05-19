@@ -47,8 +47,8 @@ vignettes/*.pdf
 # ShinyApps manifest
 *.dcf
 
-# Data folder
-/data/
+# References folder
+/data/References/
 
 #Knitted Rmarkdown files
 *.html
