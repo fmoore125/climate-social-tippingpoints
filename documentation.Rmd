@@ -55,18 +55,23 @@ $$\mathbf{Network_{t}} = \left[\begin{array}
 
 <p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assimilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
 
-<p style="font-size:14pt">Finally, we also allow for a feedback where changing policy can influence opinion by providing evidence on the population-wide norm (as oppposed to the norm experienced by individuals which depends on the social network). Evidence for the existence of this effect is not particularly strong (Tankard and Paluck, 2016), but it constitutes a potentially important feedback mechanism. The strenght of this effect depends on the change in policy last period ($\Delta Policy_{t-1}$) and a scaling parameter $\kappa$:
+<p style="font-size:14pt">Finally, we also allow for two possible feedbacks either changes in policy or adoption of individual behaviors can influence opinion. Evidence in the literature for both of these effects is fairly weak (e.g. Tankard and Paluck, 2016), but these both constitute potentially important positive feedback effects.</p>
+
+<p style="font-size:14pt">The hypothetical feedback from policy to opinion operates by providing evidence on the population-wide norm (as oppposed to the norm experienced by individuals which depends on the social network). The strenght of this effect depends on the change in policy last period ($\Delta Policy_{t-1}$) and a scaling parameter $\kappa$:
 $$PolOp_{t}=\kappa \Delta Policy_{t-1}$$</p>
 <p style="font-size:14pt">Note that this effect is the same for all opinion groups and that the sign can be either positive or negative, depending on whether the policy change last period increased (positive) or decreased (negative) pro-climate policies.</p>
 
+<p style="font-size:14pt">The hypothetical feedback from adoption to opinion is similarly governed by a single parameter, $\xi$, which gives the effect in percentage points of increasing support for climate policy after adopting sustainable behaviors. Note that, unlike the policy opinion feedback, this effect is unidirectional (it can only take positive values) - adopting more sustainable behaviors can only increase support for climate policy.</p>
 
 <p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
 $$\mathbf{P_{t}}=\left[\begin{array}
 {rrr}
-(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}-PolOp) & \sum_{j=2,3}SocialForce_{1,j}-\eta*Ev_{1}-PolOp & 0 \\
-SocialForce_{2,1}+\eta*Ev_{2}+PolOp & (1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta*Ev_{2}-PolOp \\
-0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3}+PolOp & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta*Ev_{3}+PolOp)
+(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}-\xi A_{1,t-1}) & \sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}-\xi A_{1,t-1} & 0 \\
+SocialForce_{2,1}+\eta Ev_{2,t-1}+PolOp_{t}+\xi A_{2,t-1} & 1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta Ev_{2,t-1}-PolOp-\xi A_{2,t-1} \\
+0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t}+\xi A_{3,t-1} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t}+\xi A_{3,t-1})
 \end{array}\right]$$</p>
+
+<p style="font-size:14pt">Where $A_{i,t-1}$ is the fraction of adopters in opinion group $i$ in the previous time period (described in the Adoption Component)</p>
 
 <p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
 $$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$</p>

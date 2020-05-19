@@ -13,6 +13,7 @@ model=function(time=1:86,
                frac_neut_0=frac_neut_01,
                forcestrong=forcestrong1,
                forceweak=forceweak1,
+               adoptionopinionfeedback_param=adoptionopinionfeedback_param01,
                pol_response=pol_response1,
                policy_pbcchange_max=policy_pbcchange_max1,
                policy_0=policy_01,
@@ -41,7 +42,8 @@ model=function(time=1:86,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
                lbd_param=lbd_param01,
-               lag_param=lag_param01){
+               lag_param=lag_param01
+               ){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -100,7 +102,7 @@ model=function(time=1:86,
   anomaly[1]=ifelse(shiftingbaselines==0,weather[1],naturalvariability[1])
   
   for(t in 2:length(time)){
-    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params,policychange_t_1=ifelse(t==2,0,policy[t-1]-policy[t-2]),policyopinionfeedback=policyopinionfeedback_param)
+    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params,policychange_t_1=ifelse(t==2,0,policy[t-1]-policy[t-2]),policyopinionfeedback=policyopinionfeedback_param,adopt_t_1=adoptersfrac[t-1,],adoptionopinionfeedback=adoptionopinionfeedback_param)
     policy[t]=policychange(distributions[t,],policy[t-1],responsiveness=pol_response)
     
     temp=adopterschange(nadopters[t-1],adoptersfrac[t-1,],policy[t-1],distributions[t,],etcmid=etc_mid,etcsteep=etc_steep,total=etc_total,init_pbc=pbc_0,maxpolpbc=policy_pbcchange_max,pbcmid=pbc_mid,pbcsteep=pbc_steep,shift=pbc_opinionchange,normstrength=normeffect,selfsimparam=homophily)

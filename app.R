@@ -20,8 +20,7 @@ ui <- fluidPage(
       sliderInput("forceweak", "Persuasive Force from Neutral - min=0 (no effect), max=Force from Opinionated", 0.1, min = 0, max = 1, step = 0.05),
       sliderInput("evidenceeffect","Effect of Perceived Weather on Opinion min=0 (no effect), max=0.5 (large effect)",0,min=0,max=0.5,step=0.1),
       sliderInput("policyopinionfeedback_param","Effect of Policy on Opinion min=0 (no effect), max=0.01 (large effect)",0,min=0,max=0.01,step=0.001),
-      
-      
+      sliderInput("adoptionopinionfeedback_param","Effect of Adoption on Opinion min=0 (no effect), max=0.1 (large effect)",0,min=0,max=0.1,step=0.01),
       
       h2("Policy Response Parameters"),
       sliderInput("pol_response", "Responseiveness of Policy to Opinion - min=1 (fully responsive), max=10 (very unresponsive)", 1.5, min = 1, max = 10, step = 0.5),
@@ -79,8 +78,8 @@ server <- function(input, output, session) {
   natvar1=Re(randomts(gtemp))[1:86]*8
   
   m<-reactive(model(homophily_param=input$homophily_param,frac_opp_0 = input$frac_opp_0,frac_neut_0 = input$frac_neut_0,
-                    forcestrong=input$forcestrong, forceweak=input$forceweak,pol_response = input$pol_response,
-                    pbc_mid=input$pbc_mid,pbc_steep=input$pbc_steep,policy_pbcchange_max=input$policy_pbcchange_max,
+                    forcestrong=input$forcestrong, forceweak=input$forceweak,adoptionopinionfeedback_param=input$adoptionopinionfeedback_param,
+                    pol_response = input$pol_response, pbc_mid=input$pbc_mid,pbc_steep=input$pbc_steep,policy_pbcchange_max=input$policy_pbcchange_max,
                     pbc_opinionchange=c(input$oppose_adopt,0,-1*input$support_adopt),normeffect=input$normeffect, etc_mid=input$etc_mid,
                     etc_steep=input$etc_steep,etc_total=input$etc_total,r_max=input$r_max,m_max=input$m_max/100,adopt_effect=input$adopt_effect/100,
                     evidenceeffect = input$evidenceeffect,biassedassimilation = input$biassedassimilation,shiftingbaseline=input$shiftingbaseline,natvar=natvar1,
@@ -120,7 +119,7 @@ server <- function(input, output, session) {
     mod=m()
     temp=melt(data.frame(Time=mod$year,Emissions=mod$totalemissions,BAU=mod$bau_total),id.vars="Time",variable.name="Scenario",value.name="Emissions")
     temp2=melt(data.frame(Time=mod$year,OECD=mod$emissions,OutsideRegion=mod$totalemissions-mod$emissions),id.vars="Time",variable.name="Region",value.name="Emissions")
-    ggplot(temp,aes(x=Time,y=Emissions,col=Scenario))+geom_line(lwd=2)+geom_area(aes(x=Time,y=Emissions,fill=Region),col="black",data=temp2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Emissions (GtC per Year)",x="",y="")+
+    ggplot(temp,aes(x=Time,y=Emissions,col=Scenario))+geom_line(lwd=2)+geom_area(aes(x=Time,y=Emissions,fill=Region),col="black",data=temp2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.7))+labs(title="Emissions (GtC per Year)",x="",y="")+
       scale_color_manual(values=c("#142c31","#efbd13"),labels=c("Total Emissions","BAU - RCP7.0"))+scale_fill_manual(values=c("#d75939","#2faeb4"),labels=c("OECD","Rest of World"))
     
   })
