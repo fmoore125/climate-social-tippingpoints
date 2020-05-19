@@ -93,13 +93,16 @@ networkfunc=function(distribution=c(frac_opp_0,frac_neut_0,frac_supp_0),selfsimp
 #Emissions depend on bau emissions, adoption of mitigative behaviours, and policy
 
 emissions=read.csv("data/emissions_ssp3_rcp7.csv")
-bau1=emissions[,2]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau_outside1=emissions[,4]/1000*12/(12+16+16)
 
 #more policy increases the contemporaneous effect on emissions and the duration of the effect
 #two parameters describe how the contemporaneous effect changes with policy
 #m_max has a value less than one and describes the maximum fraction of emissions that could be cut instantly by policy
 #m assympototes to this value
 m_max1=0.05
+
+lag_param01=10 #number of years lag from mitigation pathway in OECD to rest of world - set to zero to treat as single region
 
 #this parameter captures learning by doing (lbd) for policy-induced mitigation
 #it gives the fractional decrease in cost for each doubling of installed mitigation capacity, relative to the initial maximum value (i.e. m_max1)
@@ -120,7 +123,7 @@ r_01=2
 adopt_effect1=0.1
 
 ####----------Climate Component --------------------------
-ex_forcing1=emissions[,3]
+ex_forcing1=emissions[,5]
 
 ####----------Cognition Component -------------------------
 #This parameter weights evidence provided by the weather depending on opinions about climate change

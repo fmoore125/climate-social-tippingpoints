@@ -28,6 +28,7 @@ model=function(time=1:86,
                etc_steep=etc_steep1,
                normeffect=normeffect1,
                bau=bau1,
+               bau_outside_region=bau_outside1,
                ex_forcing=ex_forcing1,
                m_max=m_max1,
                r_max=r_max1,
@@ -39,7 +40,8 @@ model=function(time=1:86,
                year0=2015,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
-               lbd_param=lbd_param01){
+               lbd_param=lbd_param01,
+               lag_param=lag_param01){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -67,6 +69,9 @@ model=function(time=1:86,
   
   emissions=numeric(length=length(time))
   emissions[1]=bau[1]
+  
+  totalemissions=numeric(length=length(time))
+  totalemissions[1]=bau[1]+bau_outside_region[1]
   
   mitigation=matrix(0,nrow=length(time),ncol=length(time)) #must be all zeroes to start
   
@@ -103,19 +108,20 @@ model=function(time=1:86,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
-    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param)
+    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
+    totalemissions[t]=temp2[[3]]
     
     #climate model
     psi1=0.022
     nu=3
     
-    temp3=temperaturechange(temperature[t-1,],mass[t-1,],emissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+    temp3=temperaturechange(temperature[t-1,],mass[t-1,],totalemissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
     mass[t,]=temp3[[1]]
     temperature[t,]=temp3[[2]]
     
-    temp4=temperaturechange(bau_temp[t-1,],bau_mass[t-1,],bau[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+    temp4=temperaturechange(bau_temp[t-1,],bau_mass[t-1,],bau[t]+bau_outside_region[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
     bau_mass[t,]=temp4[[1]]
     bau_temp[t,]=temp4[[2]]
     weather[t]=temperature[t,1]+naturalvariability[t]
@@ -125,8 +131,8 @@ model=function(time=1:86,
     evidence[t,]=temp5[[2]]
     
   }
-  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1))
-  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau","mass","temp","bau_temp","evidence","anomaly","year")
+  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions)
+  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau","mass","temp","bau_temp","evidence","anomaly","year","totalemissions")
   
   return(a)
 }
