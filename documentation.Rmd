@@ -21,7 +21,7 @@ node [shape = oval,
   Opinion; Adoption; Policy; Emissions; Climate; Cognition
 
 Opinion->{Adoption Policy} Policy->{Adoption Opinion}
-Adoption->Emissions Policy->Emissions Emissions->Climate
+Adoption->{Emissions Opinion} Policy->Emissions Emissions->Climate
 Climate->Cognition Cognition->Opinion
 
 }
