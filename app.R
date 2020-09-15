@@ -20,10 +20,11 @@ ui <- fluidPage(
       sliderInput("forceweak", "Persuasive Force from Neutral - min=0 (no effect), max=Force from Opinionated", 0.1, min = 0, max = 1, step = 0.05),
       sliderInput("evidenceeffect","Effect of Perceived Weather on Opinion min=0 (no effect), max=0.5 (large effect)",0,min=0,max=0.5,step=0.1),
       sliderInput("policyopinionfeedback_param","Effect of Policy on Opinion min=0 (no effect), max=0.01 (large effect)",0,min=0,max=0.01,step=0.001),
-      sliderInput("adoptionopinionfeedback_param","Effect of Adoption on Opinion min=0 (no effect), max=0.1 (large effect)",0,min=0,max=0.1,step=0.01),
+      sliderInput("ced_param","Credibility Enhancing Display min=0 (no effect), max=0.5 (large effect)",0,min=0,max=0.5,step=0.05),
       
       h2("Policy Response Parameters"),
-      sliderInput("pol_response", "Responseiveness of Policy to Opinion - min=1 (fully responsive), max=10 (very unresponsive)", 1.5, min = 1, max = 10, step = 0.5),
+      sliderInput("pol_response", "Status Quo Bias - min=1 (no bias), max=10 (large status quo bias)", 1.5, min = 1, max = 10, step = 0.5),
+      sliderInput("pol_feedback", "Interest Group Feedback - min=-10 (large negative feedback), max=10 (large positive feedback)", 0, min = -10, max = 10, step = 0.5),
       
       h2("Individual Adoption"),
       h3("Perceived Behavioral Control"),
@@ -39,7 +40,6 @@ ui <- fluidPage(
       
       h3("Endogenous Technical Change (ETC)"),
       sliderInput("etc_mid","Fraction of Adopters for 50% of ETC Potential - min=0.25, max=0.8",0.5,min=0.25,max=0.8,step=0.05),
-      sliderInput("etc_steep","Steepness of ETC-PBC Curve - min=1, max=5",2,min=1,max=5,step=0.5),
       sliderInput("etc_total","Max Effect of ETC on PBC - min=0 (no effect), max=5",1,min=0,max=5,step=0.5),
       
       h2("Mitigation"),
@@ -78,10 +78,10 @@ server <- function(input, output, session) {
   natvar1=Re(randomts(gtemp))[1:86]*8
   
   m<-reactive(model(homophily_param=input$homophily_param,frac_opp_0 = input$frac_opp_0,frac_neut_0 = input$frac_neut_0,
-                    forcestrong=input$forcestrong, forceweak=input$forceweak,adoptionopinionfeedback_param=input$adoptionopinionfeedback_param,
-                    pol_response = input$pol_response, pbc_mid=input$pbc_mid,pbc_steep=input$pbc_steep,policy_pbcchange_max=input$policy_pbcchange_max,
+                    forcestrong=input$forcestrong, forceweak=input$forceweak,ced_param=input$ced_param,
+                    pol_response = input$pol_response, pol_feedback=input$pol_feedback,pbc_mid=input$pbc_mid,pbc_steep=input$pbc_steep,policy_pbcchange_max=input$policy_pbcchange_max,
                     pbc_opinionchange=c(input$oppose_adopt,0,-1*input$support_adopt),normeffect=input$normeffect, etc_mid=input$etc_mid,
-                    etc_steep=input$etc_steep,etc_total=input$etc_total,r_max=input$r_max,m_max=input$m_max/100,adopt_effect=input$adopt_effect/100,
+                    etc_total=input$etc_total,r_max=input$r_max,m_max=input$m_max/100,adopt_effect=input$adopt_effect/100,
                     evidenceeffect = input$evidenceeffect,biassedassimilation = input$biassedassimilation,shiftingbaseline=input$shiftingbaseline,natvar=natvar1,
                     policyopinionfeedback_param=input$policyopinionfeedback_param,lbd_param=input$lbd_param/100,lag_param=input$lag_param))
   

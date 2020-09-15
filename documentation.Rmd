@@ -32,12 +32,12 @@ Climate->Cognition Cognition->Opinion
 
 <p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by up to three things: a social pressure or persuasive force based on interactions between groups given the group network structure ($Force$), evidence derived from one's own experience of weather ($Ev$), and a feedback from policy to opinion driven by individuals updating their information about the social norm based on institutiona (i.e. policy) change ($PolOp$).</p>
 
-<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). This allows flexibility to capture a weaker persausive force by people without strong opinons, while limiting the number of paprameters by assuming the persuasive force of supporterns and opposers of climate change policy is equally strong. Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
-$$\mathbf{Force} = \left[\begin{array}
+<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated ($F_{N}$), and the persuasive force of opinionated on neutral ($F_{S,O}$). There is also a "credibility-enhanding display" feedback from allowed from the Adoption Component. This allows the persuasive effect of climate policy supporters to be larger depending on the level of adoption of individual sustainable behaviors among supporters ($A_{t-1,S}$), compared to other opinion groups. The size of the effect is controlled by the ced parameter ($\xi$). Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
+$$\mathbf{Force_{t}} = \left[\begin{array}
 {rrr}
 0 & F_{N} & F_{S,O} \\
-F_{S,O} & 0 & F_{S,O} \\
-F_{S,O} & F_{N} & 0
+F_{S,O}+\xi (A_{t-1,S}-A_{t-1,N}) & 0 & F_{S,O} \\
+F_{S,O}+\xi (A_{t-1,S}-A_{t-1,O}) & F_{N} & 0
 \end{array}\right]$$</p>
 
 
@@ -51,34 +51,30 @@ $$\mathbf{Network_{t}} = \left[\begin{array}
 \frac{1-\theta}{2} S_{t} & \frac{1-\theta}{2} N_{t} & \theta O_{t}
 \end{array}\right]$$</p>
 
-<p style="font-size:14pt">The social force is given by $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force}$</p>
+<p style="font-size:14pt">The social force is given by element-wise multiplication of the network and force matrices  $\mathbf{SocialForce_{t}}=\mathbf{Network_{t}}*\mathbf{Force_{t}}$</p>
 
 <p style="font-size:14pt">In addition to social persuasion, transition between opinion groups is also determined directly by the experience of climate chance through the perception of weather anomalies. This evidence effect ($Ev$) is allowed to differ by opinion group (reflecting biassed assimilation or other forms of motivated reasoning), can take positive or negative values (depending on whether the perceived weather anomaly is warm or cold), and is scaled by the "evidence effectiveness" parameter, ($\eta$) which determines how strongly perceived weather anomalies affect opinion. More details on how the evidence based on climate change is calculated is in the Cognition Component.</p>
 
-<p style="font-size:14pt">Finally, we also allow for two possible feedbacks either changes in policy or adoption of individual behaviors can influence opinion. Evidence in the literature for both of these effects is fairly weak (e.g. Tankard and Paluck, 2016), but these both constitute potentially important positive feedback effects.</p>
+<p style="font-size:14pt">Finally, we also allow for a possible feedbacks allowing changes in policy to influence opinion. Evidence in the literature for this effects is fairly weak (e.g. Tankard and Paluck, 2016), but it is a potentially important positive feedback effect.</p>
 
 <p style="font-size:14pt">The hypothetical feedback from policy to opinion operates by providing evidence on the population-wide norm (as oppposed to the norm experienced by individuals which depends on the social network). The strenght of this effect depends on the change in policy last period ($\Delta Policy_{t-1}$) and a scaling parameter $\kappa$:
 $$PolOp_{t}=\kappa \Delta Policy_{t-1}$$</p>
 <p style="font-size:14pt">Note that this effect is the same for all opinion groups and that the sign can be either positive or negative, depending on whether the policy change last period increased (positive) or decreased (negative) pro-climate policies.</p>
 
-<p style="font-size:14pt">The hypothetical feedback from adoption to opinion is similarly governed by a single parameter, $\xi$, which gives the effect in percentage points of increasing support for climate policy after adopting sustainable behaviors. Note that, unlike the policy opinion feedback, this effect is unidirectional (it can only take positive values) - adopting more sustainable behaviors can only increase support for climate policy.</p>
-
 <p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
 $$\mathbf{P_{t}}=\left[\begin{array}
 {rrr}
-(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}-\xi A_{1,t-1}) & \sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}-\xi A_{1,t-1} & 0 \\
-SocialForce_{2,1}+\eta Ev_{2,t-1}+PolOp_{t}+\xi A_{2,t-1} & 1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta Ev_{2,t-1}-PolOp-\xi A_{2,t-1} \\
-0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t}+\xi A_{3,t-1} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t}+\xi A_{3,t-1})
+(1-(\sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}) & \sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t} & 0 \\
+SocialForce_{2,1}+\eta Ev_{2,t-1}+PolOp_{t} & 1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta Ev_{2,t-1}-PolOp \\
+0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t})
 \end{array}\right]$$</p>
-
-<p style="font-size:14pt">Where $A_{i,t-1}$ is the fraction of adopters in opinion group $i$ in the previous time period (described in the Adoption Component)</p>
 
 <p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
 $$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$</p>
 
 ## Policy Component
 
-<p style="font-size:14pt">Collective policy is summarized by a single value, which can be positive or negative, and can be thought of as the magnitude of the tax on carbon emissions (or subsidy of fossil fuels). Policy is cumulative, with the change in policy each period determined by the distribution of opinion and a single "policy responsiveness" parameter, $\nu$.</p>
+<p style="font-size:14pt">Collective policy is summarized by a single value, which can be positive or negative, and can be thought of as the magnitude of the tax on carbon emissions (or subsidy of fossil fuels). Policy is cumulative, with the change in policy each period determined by the distribution of opinion and a single parameter, $\nu$, which captures the magnitude of bias towards the status quo.</p>
 
 <p style="font-size:14pt">If the number of supporters is greater than the number of opposers (i.e. $S_{t}>O_{t}$) the the change in policy in period t is given by:
 $$\Delta Policy_{t} = 
@@ -87,7 +83,7 @@ $$\Delta Policy_{t} =
     (1-N_{t})^{2}*( \frac{S_{t}}{O_{t}}-\nu)^{(1+\frac{1}{\nu})}              &\text{otherwise}
 \end{cases}$$</p>
 
-<p style="font-size:14pt">The policy responsiveness parameter does two things. Firstly it creates a threshold that majorities of opinion must overcome, before they are able to influence policy. Secondly it affects the rate at which policy responds to larger opinion majorities beyond the threshold. At the lower bound of $\nu=1$, simple majorities are enough to effect change and the rate of change is a quadratic in the size of the majoritiy. As $\nu$ increases, the opinion threshold becomes larger and the rate of increase tends towards linear (i.e. $(1+\frac{1}{\nu})\xrightarrow[\nu \to \infty]{} 1$). The population of people without strong opinions on climate policy ($N_{t}$) creates inertia in the policy response, so that the policy response is smaller if a large fraction of people do not have strong opinions about policy.</p>
+<p style="font-size:14pt">The status quo bias parameter does two things. Firstly it creates a threshold that majorities of opinion must overcome, before they are able to influence policy. Secondly it affects the rate at which policy responds to larger opinion majorities beyond the threshold. At the lower bound of $\nu=1$, simple majorities are enough to effect change and the rate of change is a quadratic in the size of the majoritiy. As $\nu$ increases, the opinion threshold becomes larger and the rate of increase tends towards linear (i.e. $(1+\frac{1}{\nu})\xrightarrow[\nu \to \infty]{} 1$). The population of people without strong opinions on climate policy ($N_{t}$) creates inertia in the policy response, so that the policy response is smaller if a large fraction of people do not have strong opinions about policy.</p>
 
 <p style="font-size:14pt">The functional form with two values of $\nu$ and two values of $N_{t}$ are given below:</p>
 
@@ -113,6 +109,16 @@ legend("topleft",legend=c("Policy Responsiveness=1.25, Neutral=0.2","Policy Resp
 
 <p style="font-size:14pt">The formulation is symmetric in the opposite case that $O_{t}>S_{t}$, with the change in policy then being negative rather than positive. Policy is limited by an arbitrary maximimum value of 300.</p>
 
+<p style="font-size:14pt">An interest group feedback effect allows the the status quo bias to change as function of previous policy. It can be either a postive or a negative feedback. A positive feedback captures the ways in which policy change can establish new business or public interests that can be mobilized to advocate for more poilicy. A negative feedback reflects the possibility that small policy change can mobilize existing powerful interests opposed to policy change to lobby against further change. The feedback therefore has asymmetrical or directional effect on the status-quo bias - increasing it to resist chnage in one direction while decreasing it in the other direction.</p>
+
+<p style="font-size:14pt">The size of the interest group feedback effect ($Ig$) depends on the feedback parameter $\zeta$ and on the average value of policy over some previous time window ($w$), set by default to 10 years:
+$$Ig=\zeta*\sqrt{\frac{|\overline{Policy_{w}}|}{300}}$$
+Where $|\overline{Policy_{w}}|$ is the mean absolute value of policy over the previous $w$ year window. The square-root functional form allows for largest changes at small policy magnitudes (for instance by the creation of new industries) that saturates at larger values. Division by the maximum policy value (300) limits the maximum feedback effect to $\zeta$. The sign of $Ig$ is either positive or negative depending on the sign of $\zeta$. </p>
+
+<p style="font-size:14pt">The feedback effect is applied to the status-quo bias parameter differently depending on the sign of policy over the window $w$. If past policy was pro-climate (i.e. positive sign), the status quo bias against more pro-climate changes ($\nu_{pro}$) becomes $\nu_{pro}=\nu-Ig$ and the status quo bias against reversing that previous policy becomes ($\nu_{opp}=\nu+Ig$). Note that if $\zeta$ and therefore $Ig$ is positve, this decreases the status-quo bias against more climate policy, whereas if $\zeta$ is negative this increases the status-quo bias. The effect is symmetric if mean policy over $w$ was negative instead of positive. </p>
+
+
+
 ## Adoption Component
 
 <p style="font-size:14pt">Individual behavior to reduce emissions is represented by choice to adopt or not adopt a single sustainable behavior that reduces individual emissions. It can be thought of as a representitive composite of all the actions individuals can take to reduce emissions. The adoption decision is determined by two things: 1) the social norm around adoption / non-adoption determined by the social network for each opinion group and 2) perceived behavioral control, the opposite of adoption costs, which are affected by the total number of adopters, policy, and opinion.</p>
@@ -132,7 +138,7 @@ lambda=c(0.2,0.5)
 frac=seq(0,1,length.out=50)
 normfunction=function(fraction, lam){
   if(fraction>0.5) norm=lam*(1-4*fraction+4*fraction^2)
-  if(fraction<=0.5) norm=lam*(-1+4*fraction-4*fraction^2)
+  if(fraction<=0.5) norm=lam*(-1+4*fraction-4*fraction^2) 
   return(norm)
 }
 y=sapply(frac,function(x) normfunction(x,lambda))

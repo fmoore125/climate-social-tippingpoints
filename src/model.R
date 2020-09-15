@@ -13,8 +13,10 @@ model=function(time=1:86,
                frac_neut_0=frac_neut_01,
                forcestrong=forcestrong1,
                forceweak=forceweak1,
-               adoptionopinionfeedback_param=adoptionopinionfeedback_param01,
+               ced_param=ced_param1,
                pol_response=pol_response1,
+               pol_window=pol_window1,
+               pol_feedback=pol_feedback1,
                policy_pbcchange_max=policy_pbcchange_max1,
                policy_0=policy_01,
                adoptfrac_opp_0= adoptfrac_opp_01,
@@ -52,7 +54,7 @@ model=function(time=1:86,
   params_supp=c((1-homophily_param)/2,(1-homophily_param)/2,homophily_param)
   homophily=list(params_opp,params_neut,params_supp)
   
-  force_params=matrix(c(0,forceweak,forcestrong,forcestrong,0,forcestrong,forcestrong,forceweak,0),byrow=TRUE,nrow=3)
+  force_params=forcefunc(forcestrong,forceweak,forcestrong)
   
   distributions=matrix(nrow=length(time),ncol=3)
   distributions[1,]=startdist
@@ -102,8 +104,8 @@ model=function(time=1:86,
   anomaly[1]=ifelse(shiftingbaselines==0,weather[1],naturalvariability[1])
   
   for(t in 2:length(time)){
-    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params,policychange_t_1=ifelse(t==2,0,policy[t-1]-policy[t-2]),policyopinionfeedback=policyopinionfeedback_param,adopt_t_1=adoptersfrac[t-1,],adoptionopinionfeedback=adoptionopinionfeedback_param)
-    policy[t]=policychange(distributions[t,],policy[t-1],responsiveness=pol_response)
+    distributions[t,]=opinionchange(distributions[t-1,],evidence[t-1,],evidence_effect=evidenceeffect,selfsimparams=homophily,force=force_params,policychange_t_1=ifelse(t==2,0,policy[t-1]-policy[t-2]),policyopinionfeedback=policyopinionfeedback_param,adopt_t_1=adoptersfrac[t-1,],ced=ced_param)
+    policy[t]=policychange(distributions[t,],policy[t-1],ifelse(t>pol_window,mean(policy[(t-pol_window):(t-1)]),mean(policy[1:(t-1)])),responsiveness=pol_response,feedback=pol_feedback)
     
     temp=adopterschange(nadopters[t-1],adoptersfrac[t-1,],policy[t-1],distributions[t,],etcmid=etc_mid,etcsteep=etc_steep,total=etc_total,init_pbc=pbc_0,maxpolpbc=policy_pbcchange_max,pbcmid=pbc_mid,pbcsteep=pbc_steep,shift=pbc_opinionchange,normstrength=normeffect,selfsimparam=homophily)
     pbc[t]=temp[[1]]

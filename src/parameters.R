@@ -16,6 +16,11 @@ homophily_param1=0.8
 forcestrong1=0.2 #effect of someone with strong opinions on neutral opinions
 forceweak1=0.1 #effect of someone with neutral opinions on strong opinions
 
+#credibility-enhancing display - this parameter controls a feedback from adoption to opinion
+#if it is greater than zero, the persuasive force of people who support climate policy increases with the fraction that are adopters
+#the parameter gives the largest possible change in persuasive force (starting at forcestrong)- i.e the change in persuasive force if all supporters are adopters
+ced_param1=0
+
 #this parameter scales the evidence from weather from the congition component to changes in the probability of transition
 #a value of 0 means people are only influenced by social norm dynamics, not by experience of weather
 #a value of 0.1 means a perceived anomaly of 1 degree will increase the probability of transition toward a more climate-believing state by 0.1
@@ -26,12 +31,6 @@ evidenceeffect1=0.1
 #a value of 0.01 means a policy change of 5 last period increases the probability of supporting climate policy by 0.05
 policyopinionfeedback_01=0.01
 
-#this parameter governs a feedback effect from apoption of sustainable behaviors to opinion about climate change
-#evidence for this effect in the literature is weak, but it is includded here as a parameter to explore, controling a potentially important feedback loop
-#a value of 0 shuts down this feedback
-#a value of 0.01 means adopting sustainable behavior increases the probability of transitioning to opinion more supportive of climate policy by 1pp
-adoptionopinionfeedback_param01=0.05
-
 
 ###--------Responsiveness of Policy to Opinion Distribution-----------------------
 
@@ -40,6 +39,14 @@ adoptionopinionfeedback_param01=0.05
 #values should be >=1 
 #a value of 1 implies fully responsive, no intertia, values much larger in 1 imply inertia 
 pol_response1=1.5
+
+#there is a feedback within the policy component that allows policy over time to create political constituencies in favor of more policy
+#the magnitude of this effect depends on the average policy value over some previous time period (window) and a feedback strength parameter
+#negative values for the policy feedback are possible - these capture the opposite effect where policy change motivates political constituencies in opposition to that change
+
+pol_window1=10 #number of years of prior policy that determine strength of current policy feedback
+pol_feedback1=3 #maximum change (in absolute terms) in pol responsiveness parameter (compare to base value, pol_response). 
+
 
 #this parameter gives the extent to which policy can raise or lower PBC 
 #change is linear in policy up to this absolute amount
@@ -75,7 +82,7 @@ pbc_01=-1.5
 #three parameters - total change in pbc allowable, midpoint (betwen 0 and 1 - higher numbers imply more people needed before significant cost reduction effects), steepness
 etc_mid1=0.5 #etc = endogenous technical change
 etc_total1=2 #reference point should be initial pbc, pbc_0 - this parameter determines how much this moves with full adoption
-etc_steep1=4
+etc_steep1=2
 
 #norm sensitivity - how much effect does having your network be adopters of non-adopters have on your probability of adoption?
 #shifts adoption-pbc curve up and down, assume symmetric for adoption and non-adoption
@@ -90,6 +97,12 @@ normeffect1=0.1
 networkfunc=function(distribution=c(frac_opp_0,frac_neut_0,frac_supp_0),selfsimparam=homophily){
   return(matrix(c(distribution*selfsimparam[[1]]/c(distribution%*%selfsimparam[[1]]),distribution*selfsimparam[[2]]/c(distribution%*%selfsimparam[[2]]),distribution*selfsimparam[[3]]/c(distribution%*%selfsimparam[[3]])),byrow=TRUE,nrow=3))
 }
+
+#return opinion social force matrix given force from neutral, opposers, and supporters
+forcefunc=function(force_opp=forcestrong1,force_neut=forceweak1,force_supp=forcestrong1){
+  return(matrix(c(0,force_neut,force_supp,force_opp,0,force_supp,force_opp,force_neut,0),byrow=TRUE,nrow=3))
+}
+
 
 ####----------Emissions Component --------------------------
 
