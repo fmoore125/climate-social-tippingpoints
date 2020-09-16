@@ -129,7 +129,7 @@ lbd_param01=0.1
 #policy also increases the duration of mitigation measures, thorugh increasingly large investments to long-lived capital
 #r is the scaling time of the mitigation investment, policy increases this linearly up to a maximum
 #r_max is a value in years describing the maximum scaling time - should be similar to turnover of capital stock - can take values>1
-r_max1=15
+r_max1=30
 #r0 is the initial duration of investments at very low levels of policy - should be greater than 1
 #at t=r_0, 36% of original remains
 r_01=2
