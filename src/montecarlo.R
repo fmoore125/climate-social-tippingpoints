@@ -1,8 +1,9 @@
 source("src/model.R")
 library(doParallel)
 library(foreach)
+library(tidyverse)
 
-#parameters to vary
+#-----Define MC Parameters ---------------
 
 #----opinion component
 
@@ -39,7 +40,7 @@ pol_feedback_mc=c(-8,0,8)
 #norm effectiveness
 normeffect_mc=c(0,0.4)
 
-#opinion effect on adoption_supporters
+#opinion effect on adoption
 pbc_opinionchange_mc=c(0,0.6)
 
 
@@ -66,8 +67,11 @@ shiftingbaselines_mc=c(0,1)
 #biased assimilation
 biassedassimilation_mc=c(0,0.6)
 
+#-----Run Monte Carlo ----------
+
 #parameter grid
 pgrid=expand.grid(homophily_param_mc,policyopinionfeedback_param_mc,evidenceeffect_mc,ced_param_mc,pol_response_mc,pol_feedback_mc,normeffect_mc,pbc_opinionchange_mc,etc_total_mc,m_max_mc,lbd_param_mc,adopt_effect_mc,shiftingbaselines_mc,biassedassimilation_mc)
+colnames(pgrid)=c("homophily_param","policyopinionfeedback_param","evidenceeffect","ced_param","pol_response","pol_feedback","normeffect","pbc_opinionchange","etc_total","m_max","lbd_param","adopt_effect","shiftingbaselines","biassedassimilation")
 
 #loop through parameters and run model for each combination
 
@@ -84,5 +88,41 @@ registerDoParallel(cl)
 mcmods=foreach(i=1:dim(pgrid)[1])%dopar%{
   helper(as.numeric(pgrid[i,]))
 }
-save(mcmods,file="datamcmods.Rdat")
+save(mcmods,file="data/MC Runs/mcmods.Rdat")
 
+
+#-------Analyze MC Output------------
+
+load("data/MC Runs/mcmods.Rdat")
+
+#key feedbacks: policyopinion, ced, evidenceeffect, pol_feedback, normeffect, etc_total, lbd_param
+#for each key feedback:
+#1) find change in distribution of outputs when on vs off
+#2) random forest to identify drivers of variance
+
+#two relevant variables - policy and total emissions
+
+keys=c("policyopinionfeedback_param","evidenceeffect","ced_param","pol_feedback","normeffect","etc_total","lbd_param")
+
+for(i in 1:length(keys)){
+  #divide parameter grid into 2 based on presence or absence of feedback
+  keyvar=which(colnames(pgrid)==keys[i])
+  pgrid_1=which(pgrid[,keyvar]!=0)
+  pgrid_0=which(pgrid[,keyvar]==0)
+  
+  diff_policy=matrix(nrow=dim(pgrid_1)[1],ncol=length(mcmods[[1]]$policy))
+  diff_emissions=matrix(nrow=dim(pgrid_1)[1],ncol=length(mcmods[[1]]$totalemissions))
+  
+  for(j in 1:dim(diff_policy)[1]){
+    tomatch=pgrid[pgrid_1[j],]; tomatch[keyvar]=0
+    match_0=which(apply(pgrid, 1, function(x) identical(as.numeric(x), as.numeric(tomatch))))
+    
+    diff_policy[j,]=mcmods[[pgrid_1[j]]]$policy-mcmods[[match_0]]$policy
+    diff_emissions[j,]=mcmods[[pgrid_1[j]]]$totalemissions-mcmods[[match_0]]$totalemissions
+    
+    if(j%%1000==0) print(j)
+  }
+  
+  x11()
+  
+}
