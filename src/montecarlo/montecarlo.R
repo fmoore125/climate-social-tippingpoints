@@ -10,13 +10,13 @@ library(foreach)
 homophily_param_mc=c(0.35,0.7,0.95)
 
 #policy opinion feedback
-policyopinionfeedback_param_mc=c(0,0.015,0.03)
+policyopinionfeedback_param_mc=c(0,0.03)
 
 #evidence effect
-evidenceeffect_mc=c(0,0.2,0.4)
+evidenceeffect_mc=c(0,0.4)
 
 #credibility-enhancing display
-ced_param_mc=c(0,0.2,0.4)
+ced_param_mc=c(0,0.4)
 
 #initial opinion distribution - not varied, but fixed at particular values from Yale Climate Communications Project
 frac_opp_mc=0.26 #doubtful and dismissive (global warming 6 americas)
@@ -37,14 +37,14 @@ pol_feedback_mc=c(-8,0,8)
 #----adoption component
 
 #norm effectiveness
-normeffect_mc=c(0,0.2,0.4)
+normeffect_mc=c(0,0.4)
 
 #opinion effect on adoption_supporters
-pbc_opinionchange_mc=c(0,0.3,0.6)
+pbc_opinionchange_mc=c(0,0.6)
 
 
 #technical change feedback
-etc_total_mc=c(0,1,2)
+etc_total_mc=c(0,2)
 
 
 #----emissions component
@@ -53,10 +53,10 @@ etc_total_mc=c(0,1,2)
 m_max_mc=c(0.01,0.03,0.05)
 
 #learning by doing parameter
-lbd_param_mc=c(0,0.1,0.2)
+lbd_param_mc=c(0,0.2)
 
 #effectiveness of adoption
-adopt_effect_mc=c(0.1,0.2,0.3)
+adopt_effect_mc=c(0.1,0.3)
 
 #----cognition component
 
@@ -64,7 +64,7 @@ adopt_effect_mc=c(0.1,0.2,0.3)
 shiftingbaselines_mc=c(0,1)
 
 #biased assimilation
-biassedassimilation_mc=c(0,0.3,0.6)
+biassedassimilation_mc=c(0,0.6)
 
 #parameter grid
 pgrid=expand.grid(homophily_param_mc,policyopinionfeedback_param_mc,evidenceeffect_mc,ced_param_mc,pol_response_mc,pol_feedback_mc,normeffect_mc,pbc_opinionchange_mc,etc_total_mc,m_max_mc,lbd_param_mc,adopt_effect_mc,shiftingbaselines_mc,biassedassimilation_mc)
@@ -78,10 +78,11 @@ helper=function(vec,outputs=c("distributions","adoptersfrac","policy","totalemis
 }
 
 cl=makeCluster(20)
-clusterExport(cl,c("pgrid","helper","frac_opp_mc","frac_neut_mc","model","forcestrong1","forceweak1","pol_window1","policy_pbcchange_max1","policy_01","adoptfrac_opp_01","adoptfrac_neut_01","adoptfrac_supp_01","pbc_mid1","pbc_steep1","pbc_01","etc_mid1","etc_steep1","networkfunc","forcefunc","emissions","bau1","bau_outside1","lag_param01","r_max1","r_01","ex_forcing1","anomaly"))
+clusterExport(cl,c("pgrid","helper","frac_opp_mc","frac_neut_mc","model","forcestrong1","forceweak1","pol_window1","policy_pbcchange_max1","policy_01","adoptfrac_opp_01","adoptfrac_neut_01","adoptfrac_supp_01","pbc_mid1","pbc_steep1","pbc_01","etc_mid1","etc_steep1","networkfunc","forcefunc","emissions","bau1","bau_outside1","lag_param01","r_max1","r_01","ex_forcing1","anomaly","temp_0","mass_0","psi1","nu","forc_param"))
 registerDoParallel(cl)
 
 mcmods=foreach(i=1:dim(pgrid)[1])%dopar%{
   helper(as.numeric(pgrid[i,]))
 }
+save(mcmods,file="datamcmods.Rdat")
 
