@@ -1,7 +1,6 @@
 source("src/model.R")
 library(doParallel)
 library(foreach)
-library(tidyverse)
 
 #-----Define MC Parameters ---------------
 
@@ -104,25 +103,66 @@ load("data/MC Runs/mcmods.Rdat")
 
 keys=c("policyopinionfeedback_param","evidenceeffect","ced_param","pol_feedback","normeffect","etc_total","lbd_param")
 
-for(i in 1:length(keys)){
+cl=makeCluster(20)
+clusterExport(cl,c("mcmods","keys","pgrid"))
+registerDoParallel(cl)
+
+policy_mc=list();emissions_mc=list();matches_mc=list()
+
+for(i in 2:length(keys)){
+  if(i==4) next #skip policy feedback because 3 values instead of 2
   #divide parameter grid into 2 based on presence or absence of feedback
   keyvar=which(colnames(pgrid)==keys[i])
   pgrid_1=which(pgrid[,keyvar]!=0)
-  pgrid_0=which(pgrid[,keyvar]==0)
   
-  diff_policy=matrix(nrow=dim(pgrid_1)[1],ncol=length(mcmods[[1]]$policy))
-  diff_emissions=matrix(nrow=dim(pgrid_1)[1],ncol=length(mcmods[[1]]$totalemissions))
-  
-  for(j in 1:dim(diff_policy)[1]){
+  clusterExport(cl,c("keyvar","pgrid_1"))
+  matches=foreach(j=1:length(pgrid_1),.combine="c")%dopar%{
     tomatch=pgrid[pgrid_1[j],]; tomatch[keyvar]=0
-    match_0=which(apply(pgrid, 1, function(x) identical(as.numeric(x), as.numeric(tomatch))))
-    
-    diff_policy[j,]=mcmods[[pgrid_1[j]]]$policy-mcmods[[match_0]]$policy
-    diff_emissions[j,]=mcmods[[pgrid_1[j]]]$totalemissions-mcmods[[match_0]]$totalemissions
-    
-    if(j%%1000==0) print(j)
+    which(apply(pgrid, 1, function(x) identical(as.numeric(x), as.numeric(tomatch))))
   }
   
-  x11()
-  
+  clusterExport(cl,c("matches"))
+  diff_policy=foreach(j=1:length(pgrid_1),.combine="rbind")%dopar%{
+    mcmods[[pgrid_1[j]]]$policy-mcmods[[matches[j]]]$policy
+  }
+  diff_emissions=foreach(j=1:length(pgrid_1),.combine="rbind")%dopar%{
+    mcmods[[pgrid_1[j]]]$totalemissions-mcmods[[matches[j]]]$totalemissions
+  }
+  policy_mc[[i]]=diff_policy;emissions_mc[[i]]=diff_emissions;matches_mc[[i]]=matches
+  print(i)
 }
+
+#slighly different for pol_feedback because can take positive, zero and negative values
+i=4
+keyvar=which(colnames(pgrid)==keys[i])
+pgrid_pos=which(pgrid[,keyvar]>0)
+pgrid_neg=which(pgrid[,keyvar]<0)
+
+clusterExport(cl,c("keyvar","pgrid_pos","pgrid_neg"))
+matches_pos=foreach(j=1:length(pgrid_pos),.combine="c")%dopar%{
+  tomatch=pgrid[pgrid_pos[j],]; tomatch[keyvar]=0
+  which(apply(pgrid, 1, function(x) identical(as.numeric(x), as.numeric(tomatch))))
+}
+matches_neg=foreach(j=1:length(pgrid_neg),.combine="c")%dopar%{
+  tomatch=pgrid[pgrid_neg[j],]; tomatch[keyvar]=0
+  which(apply(pgrid, 1, function(x) identical(as.numeric(x), as.numeric(tomatch))))
+}
+clusterExport(cl,c("matches_pos","matches_neg"))
+diff_policy_pos=foreach(j=1:length(pgrid_pos),.combine="rbind")%dopar%{
+  mcmods[[pgrid_pos[j]]]$policy-mcmods[[matches_pos[j]]]$policy
+}
+diff_policy_neg=foreach(j=1:length(pgrid_neg),.combine="rbind")%dopar%{
+  mcmods[[pgrid_neg[j]]]$policy-mcmods[[matches_neg[j]]]$policy
+}
+diff_emissions_pos=foreach(j=1:length(pgrid_pos),.combine="rbind")%dopar%{
+  mcmods[[pgrid_pos[j]]]$totalemissions-mcmods[[matches_pos[j]]]$totalemissions
+}
+diff_emissions_neg=foreach(j=1:length(pgrid_neg),.combine="rbind")%dopar%{
+  mcmods[[pgrid_neg[j]]]$totalemissions-mcmods[[matches_neg[j]]]$totalemissions
+}
+policy_mc[[i]][[1]]=diff_policy_pos;policy_mc[[i]][[2]]=diff_policy_neg
+emissions_mc[[i]][[1]]=diff_emissions_pos;emissions_mc[[i]][[2]]=diff_emissions_neg
+matches_mc[[i]][[1]]=matches_pos;matches_mc[[i]][[2]]=matches_neg
+
+save(policy_mc,emissions_mc,matches_mc,file="data/MC Runs/mc_results.Rdat")
+
