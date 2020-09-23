@@ -1,6 +1,10 @@
 source("src/model.R")
 library(doParallel)
 library(foreach)
+library(reshape2)
+library(ggplot2)
+library(viridis)
+library(patchwork)
 
 #-----Define MC Parameters ---------------
 
@@ -165,4 +169,72 @@ emissions_mc[[i]][[1]]=diff_emissions_pos;emissions_mc[[i]][[2]]=diff_emissions_
 matches_mc[[i]][[1]]=matches_pos;matches_mc[[i]][[2]]=matches_neg
 
 save(policy_mc,emissions_mc,matches_mc,file="data/MC Runs/mc_results.Rdat")
+
+#-----------Graphing Output ---------------
+years=2015:2100
+relyears=c(2025,2050,2075,2100)
+inds=which(years%in%relyears)
+
+plots=list()
+eplots=list()
+titles=c("Policy-Opinion","Evidence Effect","Credibility-Enhancing Feedback","Political Interest Feedback","Social Norm Effect","Adoption Cost Feedback","Learning by Doing Feedback")
+for(i in 1:length(policy_mc)){
+  if(i!=4){
+    policydists=policy_mc[[i]][,inds]
+    colnames(policydists)=relyears
+    policydists=melt(policydists)
+    colnames(policydists)=c("MC","Year","Policy_Effect")
+    policydists$Year=as.factor(policydists$Year)
+    a=ggplot(policydists,aes(x=Policy_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
+    if(i%in%c(1,5)) a=a+labs(x="Difference in Policy",y="Density (Removing Exact Zeroes)",title=paste0(titles[i],", Policy"))
+    if(i!=1&i!=5) a=a+labs(x="Difference in Policy",y="",title=paste0(titles[i],", Policy"))
+    if(i!=7) a=a+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)
+    plots[[i]]=a
+    
+    emissionsdist=emissions_mc[[i]][,inds]
+    colnames(emissionsdist)=relyears
+    emissionsdist=melt(emissionsdist)
+    colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+    emissionsdist$Year=as.factor(emissionsdist$Year)
+    
+    b=ggplot(emissionsdist[-which(emissionsdist$Emissions_Effect==0),],aes(x=Emissions_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
+    if(i%in%c(1,5)) b=b+labs(x="Difference in Emissions (GtC)",y="Density (Removing Exact Zeroes)",title=paste0(titles[i],", Emissions"))
+    if(i!=1&i!=5) b=b+labs(x="Difference in Emissions (GtC)",y="",title=paste0(titles[i],", Emissions"))
+    if(i!=7) b=b+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)
+    eplots[[i]]=b
+    
+  }
+  if(i==4){
+    plots[[i]]=list();eplots[[i]]=list()
+    for(j in 1:2){
+      policydists=policy_mc[[i]][[j]][,inds]
+      colnames(policydists)=relyears
+      policydists=melt(policydists)
+      colnames(policydists)=c("MC","Year","Policy_Effect")
+      policydists$Year=as.factor(policydists$Year)
+      a=ggplot(policydists,aes(x=Policy_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
+      a=a+labs(x="Difference in Policy",y="",title=paste0(titles[i],", Policy"))
+      a=a+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-480,y=ifelse(j==1,0.04,4),label=ifelse(j==1,"Positive","Negative"),size=4)
+      plots[[i]][[j]]=a
+      
+      emissionsdist=emissions_mc[[i]][[j]][,inds]
+      colnames(emissionsdist)=relyears
+      emissionsdist=melt(emissionsdist)
+      colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+      emissionsdist$Year=as.factor(emissionsdist$Year)
+      
+      b=ggplot(emissionsdist[-which(emissionsdist$Emissions_Effect==0),],aes(x=Emissions_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
+      b=b+labs(x="Difference in Emissions (GtC)",y="",title=paste0(titles[i],", Emissions"))
+      b=b+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-18,y=ifelse(j==1,11,30),label=ifelse(j==1,"Positive","Negative"),size=4)
+      eplots[[i]][[j]]=b
+    }
+   
+  }
+  
+}
+
+x11()
+plots[[1]]+plots[[2]]+plots[[4]][[1]]+plots[[4]][[2]]+plots[[5]]+plots[[3]]+plots[[6]]+plots[[7]]+plot_layout(ncol=4)
+x11()
+eplots[[1]]+eplots[[2]]+eplots[[4]][[1]]+eplots[[4]][[2]]+eplots[[5]]+eplots[[3]]+eplots[[6]]+eplots[[7]]+plot_layout(ncol=4)
 
