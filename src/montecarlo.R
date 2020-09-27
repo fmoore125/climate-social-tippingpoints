@@ -5,6 +5,8 @@ library(reshape2)
 library(ggplot2)
 library(viridis)
 library(patchwork)
+library(randomForest)
+library(randomForestExplainer)
 
 #-----Define MC Parameters ---------------
 
@@ -177,7 +179,7 @@ inds=which(years%in%relyears)
 
 plots=list()
 eplots=list()
-titles=c("Policy-Opinion","Evidence Effect","Credibility-Enhancing Feedback","Political Interest Feedback","Social Norm Effect","Adoption Cost Feedback","Learning by Doing Feedback")
+titles=c("Policy-Opinion","Evidence Effect","Credibility-Enhancing Feedback","Pol. Int. Feedback","Social Norm Effect","Adoption Cost Feedback","Learning by Doing Feedback")
 for(i in 1:length(policy_mc)){
   if(i!=4){
     policydists=policy_mc[[i]][,inds]
@@ -237,4 +239,87 @@ x11()
 plots[[1]]+plots[[2]]+plots[[4]][[1]]+plots[[4]][[2]]+plots[[5]]+plots[[3]]+plots[[6]]+plots[[7]]+plot_layout(ncol=4)
 x11()
 eplots[[1]]+eplots[[2]]+eplots[[4]][[1]]+eplots[[4]][[2]]+eplots[[5]]+eplots[[3]]+eplots[[6]]+eplots[[7]]+plot_layout(ncol=4)
+
+#------Random Forest Analysis of Drivers of Differences ------------
+load(file="data/MC Runs/mc_results.Rdat")
+
+emissions_year=2100
+policy_year=2030
+
+#merge emissions and policy differences with values of other parameters for random forest
+#perform random forest
+rf_pol_list=list()
+rf_ems_list=list()
+rf_pol_plots=list()
+rf_ems_plots=list()
+
+for(i in 1:length(keys)){
+  inds=which(colnames(pgrid)==keys[i])
+  if(i!=4){
+    y_pol=policy_mc[[i]][,which(years==policy_year)]
+    y_ems=emissions_mc[[i]][,which(years==emissions_year)]
+    x=pgrid[matches_mc[[i]],-inds]
+    rf_pol=randomForest(x=x,y=y_pol,importance=TRUE, tree=TRUE)
+    rf_ems=randomForest(x=x,y=y_ems,importance=TRUE, tree=TRUE)
+    
+    min_depth_pol=min_depth_distribution(rf_pol)
+    min_depth_ems=min_depth_distribution(rf_ems)
+    
+    a=plot_min_depth_distribution(min_depth_pol, mean_sample = "all_trees", k = 13)
+    a=a+labs(x="",title=paste0(titles[i],", ",policy_year," Policy"))
+    
+    b=plot_min_depth_distribution(min_depth_ems, mean_sample = "all_trees", k = 13)
+    b=b+labs(x="",title=paste0(titles[i],", ",emissions_year," Emissions"))
+    
+    rf_pol_list[[i]]=list(rf_pol,min_depth_pol)
+    rf_ems_list[[i]]=list(rf_ems,min_depth_ems)
+    
+    rf_pol_plots[[i]]=a
+    rf_ems_plots[[i]]=b
+    
+    print(i)
+  }
+}
+
+for(i in 1:length(rf_pol_plots)){
+  if(i==4) next
+  
+  x11()
+  rf_pol_plots[[i]]+rf_ems_plots[[i]]+plot_layout(ncol=2)
+}
+
+i=4
+inds=which(colnames(pgrid)==keys[i])
+rf_pol_list[[i]]=list()
+rf_ems_list[[i]]=list()
+rf_pol_plots[[i]]=list()
+rf_ems_plots[[i]]=list()
+for(j in 1:2){
+  y_pol=policy_mc[[i]][[j]][,which(years==policy_year)]
+  y_ems=emissions_mc[[i]][[j]][,which(years==emissions_year)]
+  x=pgrid[matches_mc[[i]][[j]],-inds]
+  rf_pol=randomForest(x=x,y=y_pol,importance=TRUE, tree=TRUE)
+  rf_ems=randomForest(x=x,y=y_ems,importance=TRUE, tree=TRUE)
+  
+  min_depth_pol=min_depth_distribution(rf_pol)
+  min_depth_ems=min_depth_distribution(rf_ems)
+  
+  a=plot_min_depth_distribution(min_depth_pol, mean_sample = "all_trees", k = 13)
+  a=a+labs(x="",title=paste0(titles[i],ifelse(j==1," (Pos)"," (Neg)"),", ",policy_year," Policy"))
+  
+  b=plot_min_depth_distribution(min_depth_ems, mean_sample = "all_trees", k = 13)
+  b=b+labs(x="",title=paste0(titles[i],ifelse(j==1," (Pos)"," (Neg)"),", ",emissions_year," Emissions"))
+  
+  rf_pol_list[[i]][[j]]=list(rf_pol,min_depth_pol)
+  rf_ems_list[[i]][[j]]=list(rf_ems,min_depth_ems)
+  
+  rf_pol_plots[[i]][[j]]=a
+  rf_ems_plots[[i]][[j]]=b
+  print(j)
+}
+
+save(rf_pol_plots,rf_ems_plots,rf_pol_list,rf_ems_list,file="data/MC Runs/randomforests.Rdat")
+
+
+rf_pol_plots[[4]][[1]]+rf_pol_plots[[4]][[2]]+rf_ems_plots[[4]][[1]]+rf_ems_plots[[4]][[2]]+plot_layout(ncol=2)
 
