@@ -174,29 +174,42 @@ save(policy_mc,emissions_mc,matches_mc,file="data/MC Runs/mc_results.Rdat")
 
 #-----------Graphing Output ---------------
 years=2015:2100
-relyears=c(2025,2050,2075,2100)
-inds=which(years%in%relyears)
+relyears_pol=2030
+relyears_temp=2100
+inds_pol=which(years%in%relyears_pol);inds_ems=which(years%in%relyears_temp)
 
 plots=list()
 eplots=list()
 titles=c("Policy-Opinion","Evidence Effect","Credibility-Enhancing Feedback","Pol. Int. Feedback","Social Norm Effect","Adoption Cost Feedback","Learning by Doing Feedback")
 for(i in 1:length(policy_mc)){
   if(i!=4){
-    policydists=policy_mc[[i]][,inds]
-    colnames(policydists)=relyears
-    policydists=melt(policydists)
-    colnames(policydists)=c("MC","Year","Policy_Effect")
+    policydists=policy_mc[[i]][,inds_pol]
+    if(length(relyears_pol)>1){
+      colnames(policydists)=relyears_pol
+      policydists=melt(policydists)
+      colnames(policydists)=c("MC","Year","Policy_Effect")
+    }
+    if(length(relyears_pol)==1){
+      policydists=data.frame(MC=1:length(policydists),Year=rep(relyears_pol,length(policydists)),Policy_Effect=policydists)
+    }
     policydists$Year=as.factor(policydists$Year)
+    policydists$Policy_Effect[which(policydists$Policy_Effect==0)]=NA
     a=ggplot(policydists,aes(x=Policy_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
     if(i%in%c(1,5)) a=a+labs(x="Difference in Policy",y="Density (Removing Exact Zeroes)",title=paste0(titles[i],", Policy"))
     if(i!=1&i!=5) a=a+labs(x="Difference in Policy",y="",title=paste0(titles[i],", Policy"))
     if(i!=7) a=a+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)
     plots[[i]]=a
     
-    emissionsdist=emissions_mc[[i]][,inds]
-    colnames(emissionsdist)=relyears
-    emissionsdist=melt(emissionsdist)
-    colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+    emissionsdist=emissions_mc[[i]][,inds_ems]
+    if(length(relyears_temp)>1){
+      colnames(emissionsdist)=relyears
+      emissionsdist=melt(emissionsdist)
+      colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+    }
+    if(length(relyears_temp)==1){
+      emissionsdist=data.frame(MC=1:length(emissionsdist),Year=rep(relyears_temp,length(emissionsdist)),Emissions_Effect=emissionsdist)
+    }
+    
     emissionsdist$Year=as.factor(emissionsdist$Year)
     
     b=ggplot(emissionsdist[-which(emissionsdist$Emissions_Effect==0),],aes(x=Emissions_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
@@ -209,25 +222,36 @@ for(i in 1:length(policy_mc)){
   if(i==4){
     plots[[i]]=list();eplots[[i]]=list()
     for(j in 1:2){
-      policydists=policy_mc[[i]][[j]][,inds]
-      colnames(policydists)=relyears
-      policydists=melt(policydists)
-      colnames(policydists)=c("MC","Year","Policy_Effect")
+      policydists=policy_mc[[i]][[j]][,inds_pol]
+      if(length(relyears_pol)>1){
+        colnames(policydists)=relyears
+        policydists=melt(policydists)
+        colnames(policydists)=c("MC","Year","Policy_Effect")
+      }
+      if(length(relyears_pol)==1){
+        policydists=data.frame(MC=1:length(policydists),Year=rep(relyears_pol,length(policydists)),Policy_Effect=policydists)
+      }
       policydists$Year=as.factor(policydists$Year)
-      a=ggplot(policydists,aes(x=Policy_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
+      a=ggplot(policydists[-which(policydists$Policy_Effect==0),],aes(x=Policy_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
       a=a+labs(x="Difference in Policy",y="",title=paste0(titles[i],", Policy"))
-      a=a+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-480,y=ifelse(j==1,0.04,4),label=ifelse(j==1,"Positive","Negative"),size=4)
+      a=a+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-480,y=ifelse(j==1,0.02,0.05),label=ifelse(j==1,"Positive","Negative"),size=4)
       plots[[i]][[j]]=a
       
-      emissionsdist=emissions_mc[[i]][[j]][,inds]
-      colnames(emissionsdist)=relyears
-      emissionsdist=melt(emissionsdist)
-      colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+      emissionsdist=emissions_mc[[i]][[j]][,inds_ems]
+      if(length(relyears_temp)>1){
+        colnames(emissionsdist)=relyears
+        emissionsdist=melt(emissionsdist)
+        colnames(emissionsdist)=c("MC","Year","Emissions_Effect")
+      }
+      if(length(relyears_temp)==1){
+        emissionsdist=data.frame(MC=1:length(emissionsdist),Year=rep(relyears_temp,length(emissionsdist)),Emissions_Effect=emissionsdist)
+      }
+      
       emissionsdist$Year=as.factor(emissionsdist$Year)
       
       b=ggplot(emissionsdist[-which(emissionsdist$Emissions_Effect==0),],aes(x=Emissions_Effect,group=Year,fill=Year))+geom_density(alpha=0.6)+theme_bw()
       b=b+labs(x="Difference in Emissions (GtC)",y="",title=paste0(titles[i],", Emissions"))
-      b=b+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-18,y=ifelse(j==1,11,30),label=ifelse(j==1,"Positive","Negative"),size=4)
+      b=b+scale_fill_discrete(guide=FALSE)+scale_color_discrete(guide=FALSE)+annotate("text",x=-18,y=ifelse(j==1,2,2),label=ifelse(j==1,"Positive","Negative"),size=4)
       eplots[[i]][[j]]=b
     }
    
@@ -322,4 +346,96 @@ save(rf_pol_plots,rf_ems_plots,rf_pol_list,rf_ems_list,file="data/MC Runs/random
 
 
 rf_pol_plots[[4]][[1]]+rf_pol_plots[[4]][[2]]+rf_ems_plots[[4]][[1]]+rf_ems_plots[[4]][[2]]+plot_layout(ncol=2)
+
+###------------Determinants of 1.5 and 2 degrees by 2100 ------------------------
+
+cl=makeCluster(6)
+clusterExport(cl,c("mcmods"))
+registerDoParallel(cl)
+
+templim=foreach(i=1:length(mcmods),.combine="rbind")%dopar%{
+  c(ifelse(mcmods[[i]]$temp[86,1]<2,1,0),ifelse(mcmods[[i]]$temp[86,1]<1.5,1,0))
+}
+
+stopCluster(cl)
+
+#random forest to predict keeping temp under 1 and 2 degrees
+
+rf_2deg=randomForest(x=pgrid,y=as.factor(templim[,1]),importance=TRUE, tree=TRUE)
+rf_15deg=randomForest(x=pgrid,y=as.factor(templim[,2]),importance=TRUE, tree=TRUE)
+
+importance_2deg=measure_importance(rf_2deg)
+importance_15deg=measure_importance(rf_15deg)
+
+save(rf_2deg,rf_15deg,importance_2deg,importance_15deg,templim,file="data/MC Runs/templim_randomforests.Rdat")
+
+##important variables
+a=plot_multi_way_importance(importance_2deg, size_measure = "no_of_nodes",no_of_labels = 14,main="Important Variables, 2 degrees by 2100 Random Forest Classification")+scale_color_manual(values=c("blue","black"),guide=FALSE)+labs(x="Mean Minimum Depth",y="Times a Root",size="Total Number\nof Nodes")
+a
+
+#interactions with important variables
+vars2deg <- important_variables(importance_2deg, k = 5, measures = c("mean_min_depth", "no_of_nodes"))
+interactions2deg=min_depth_interactions(rf_2deg,vars2deg)
+save(interactions2deg,file="data/MC Runs/rfinteractions_2deg.Rdat")
+plot_min_depth_interactions(interactions2deg,main="2 degrees by 2100 Classification, 30 Important Interactions")+labs(x="",y="Mean Minimum Depth")
+
+#simple plot of parameter values for runs that do / don't stay under 2 degrees by 2100
+dat=data.frame(pgrid,two_deg=templim[,1])
+#recode into qualitative values
+dat$homophily_param=factor(dat$homophily_param,labels=c("Low","Mid","High"),ordered=T)
+dat$policyopinionfeedback_param=factor(dat$policyopinionfeedback_param,labels=c("Off","On"))
+dat$evidenceeffect=factor(dat$evidenceeffect,labels=c("Off","On"))
+dat$ced_param=factor(dat$ced_param,labels=c("Off","On"))
+dat$pol_response=factor(dat$pol_response,labels=c("Off","Mid","High"),ordered=T)
+dat$pol_feedback=factor(dat$pol_feedback,labels=c("Negative","Off","Positive"),ordered=T)
+dat$normeffect=factor(dat$normeffect,labels=c("Off","On"))
+dat$pbc_opinionchange=factor(dat$pbc_opinionchange,labels=c("Off","On"))
+dat$etc_total=factor(dat$etc_total,labels=c("Off","On"))
+dat$m_max=factor(dat$m_max,labels=c("Low","Mid","High"),ordered=T)
+dat$lbd_param=factor(dat$lbd_param,labels=c("Off","On"))
+dat$adopt_effect=factor(dat$adopt_effect,labels=c("Low","High"),ordered=T)
+dat$shiftingbaselines=factor(dat$shiftingbaselines,labels=c("Off","On"))
+dat$biassedassimilation=factor(dat$biassedassimilation,labels=c("Off","On"))
+
+dat=melt(dat,id.vars="two_deg")
+
+levels(dat$variable)=c("Social Network Homophily","Policy-Opinion Feedback","Evidence Effect","Cred-Enhancing Display","Status-Quo Bias","Political Interest Feedback","Social-Norm Effect","Adoption-Opinion Effect","Adoption Cost Feedback","Max Mitigation Rate","Learning-By-Doing Effect","Adoption Efficacy","Shifting Baselines","Biassed Assimilation")
+
+dat_agg=dat%>%
+  group_by(variable,value)%>%
+  summarize(mean=mean(two_deg),sd=sd(two_deg))
+
+import=dat_agg%>%
+  group_by(variable)%>%
+  summarize(import=max(mean)-min(mean))%>%
+  arrange(desc(import))
+
+import$component=c("Mitigation","Opinion","Cognition","Policy","Opinion","Opinion","Mitigation","Adoption","Adoption","Opinion","Policy","Adoption","Cognition","Mitigation")
+
+cols=data.frame(component=c("Opinion","Adoption","Policy","Mitigation","Cognition"),cols=c("#76a7a2","#7c4a4f","#e1924d","#255542","#e1a497"))
+
+
+dat_agg$variable=factor(dat_agg$variable,levels=import$variable)
+
+x11()
+par(mfrow=c(4,4),mar=c(4,3,4,2))
+for(i in 1:length(levels(dat_agg$variable))){
+  tempdat=dat_agg%>%filter(variable==levels(dat_agg$variable)[i])
+  if(i%in%c(1,6)){
+    tempdat$value=factor(tempdat$value,levels=c("Low","Mid","High"))
+    tempdat=tempdat%>%arrange(value)
+  }
+  barplot(tempdat$mean,names.arg = tempdat$value,ylim=c(0,0.55),col=as.character(cols$cols[which(cols$component==import$component[i])]),las=1,main=paste0(i,")  ",levels(dat_agg$variable)[i]))
+  abline(h=mean(templim[,1]),col="#a6152a",lwd=2)
+}
+plot.new()
+par(mar=c(0,0,0,0))
+legend("center",legend=cols$component[1:3],fill=as.character(cols$cols)[1:3],bty="n",cex=1.5,y.intersp = 2)
+plot.new()
+par(mar=c(0,0,0,0))
+legend("center",legend=cols$component[4:5],fill=as.character(cols$cols)[4:5],bty="n",cex=1.5,y.intersp = 2)
+
+a=ggplot(dat_agg,aes(x=value,y=mean,fill=value))+geom_bar(stat="identity",position="dodge")+theme_bw()+facet_wrap(~variable)
+a
+
 
