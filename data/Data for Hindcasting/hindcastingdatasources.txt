@@ -1,0 +1,18 @@
+Data sources for hindcasting:
+
+Opinion:
+
+gallup_importanceofclimatechange - https://news.gallup.com/poll/1615/environment.aspx
+"Is the seriousness of global warming generally exaggerated, generally correct, or generally underestimated?"
+
+
+gallup_usenvpolicyopinion - https://news.gallup.com/poll/1615/environment.aspx
+"Do you think the US government is doing too much, too little or about the right amount in terms of protecting the environment?"
+
+ypcc_sixamericas - https://climatecommunication.yale.edu/about/projects/global-warmings-six-americas/
+Oppose = Dismissive + Doubtful
+Neutral = Disenganged + Cautious
+Support = Concerned + Alarmed
+
+ypcc_policysupport - https://climatecommunication.yale.edu/visualizations-data/americans-climate-views/
+Fraction supporting "Regulate CO2 as a pollutant"
