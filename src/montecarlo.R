@@ -93,7 +93,7 @@ registerDoParallel(cl)
 mcmods=foreach(i=1:dim(pgrid)[1])%dopar%{
   helper(as.numeric(pgrid[i,]))
 }
-save(mcmods,file="data/MC Runs/mcmods.Rdat")
+save(mcmods,pgrid,file="data/MC Runs/mcmods.Rdat")
 
 
 #-------Analyze MC Output------------
@@ -115,7 +115,7 @@ registerDoParallel(cl)
 
 policy_mc=list();emissions_mc=list();matches_mc=list()
 
-for(i in 2:length(keys)){
+for(i in 1:length(keys)){
   if(i==4) next #skip policy feedback because 3 values instead of 2
   #divide parameter grid into 2 based on presence or absence of feedback
   keyvar=which(colnames(pgrid)==keys[i])
@@ -437,5 +437,8 @@ legend("center",legend=cols$component[4:5],fill=as.character(cols$cols)[4:5],bty
 
 a=ggplot(dat_agg,aes(x=value,y=mean,fill=value))+geom_bar(stat="identity",position="dodge")+theme_bw()+facet_wrap(~variable)
 a
+
+
+
 
 
