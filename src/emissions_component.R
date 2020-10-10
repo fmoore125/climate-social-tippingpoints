@@ -11,9 +11,9 @@ emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=a
   mmax_t=ifelse(doublings<=1,maxm,maxm*(1+lbd)^doublings)
   
   
-  m_t=ifelse(policy_t<=1,0,ifelse(policy_t>=299, mmax_t,mmax_t*(1-log(300-policy_t)/log(300)))) #300 is maximum value policy can take
+  m_t=ifelse(policy_t<=1,0,ifelse(policy_t>=299, mmax_t,mmax_t*(log(policy_t)/log(300)))) #300 is maximum value policy can take
   #lifetime of investments also depends on policy
-  r_t=min(r0*(1+policy_t),rmax)
+  r_t=min(r0*(1+policy_t/10),rmax)
   #add effect of current policy
   #mitigation is a t*t matrix of zeroes - fill in columns representing persistent effect of yearly mitigation activity
   futuretime=t:dim(mitigation)[1]-t

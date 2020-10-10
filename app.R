@@ -43,8 +43,8 @@ ui <- fluidPage(
       sliderInput("etc_total","Max Effect of ETC on PBC - min=0 (no effect), max=5",1,min=0,max=5,step=0.5),
       
       h2("Mitigation"),
-      sliderInput("m_max","Max Contemporaneous Effect of Policy on Emissions (% Reduction) - min=0.1, max=5",2.5,min=0.5,max=5,step=0.5),
-      sliderInput("r_max","Max Scaling Time of Mitigation Investments (years, Initial Value=2) - min=5, max=30",25,min=5,max=30,step=1),
+      sliderInput("m_max","Max Contemporaneous Effect of Policy on Emissions (% Reduction) - min=0.5, max=5",2.5,min=0.5,max=5,step=0.5),
+      sliderInput("r_max","Max Scaling Time of Mitigation Investments (years, Initial Value=2) - min=5, max=50",25,min=5,max=50,step=5),
       sliderInput("adopt_effect","Effectiveness of Adoption at Reducing Emissions (% Reduction) - min=0 (not effective), max=30",10,min=0,max=30,step=5),
       sliderInput("lbd_param","Learning By Doing Cost Reduction Effect - min=0 (none), max=25 (25% reduction per doubling)",0,min=0,max=25,step=5),
       sliderInput("lag_param","Lag from OECD Mitigation to Rest of World - min=0 (Single Region), max=20 (20 Year Lag)",10,min=0,max=20,step=2),

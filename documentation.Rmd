@@ -209,17 +209,17 @@ legend("bottomright",bty="n",legend=c("m=2%, r=10 years","m=5%, r=30 years"),lwd
 <p style="font-size:14pt">Both $m$ and $r$ increase with increasing policy. The change in $m$ with policy is given by
 $$m_{t}=
 \begin{cases}
-\gamma_{t}*(1-\frac{log(300-Policy_{t})}{log(300)}) & \text{it } Policy_{t}<300\\
+\gamma_{t}*\frac{log(Policy_{t})}{log(300)} & \text{if } Policy_{t}<300\\
 \gamma_{t} & \text{otherwise}
 \end{cases}$$</p>
-<p style="font-size:14pt">Where $\gamma$ is a parameter describing the maximum contemporaneous reduction in emissions and 300 comes from the arbitrary maximum value of $Policy$ (Policy Component). The functional form here reflects an upward-sloping mitigation supply curve, if $Policy$ is interpreted as a carbon price, consistent with standard economic theory and empirical estimates.</p>
+<p style="font-size:14pt">Where $\gamma$ is a parameter describing the maximum contemporaneous reduction in emissions and 300 comes from the arbitrary maximum value of $Policy$ (Policy Component).</p>
 
 <p style="font-size:14pt">A learning-by-doing effect in which mitigation technology costs change as a function of installed capacity is modeled by allowing the $\gamma_{t}$ parameter to change as a function of cumulative, policy-induced mitigation in the previous time period (i.e. $M_{pol,t-1}$, see below for $M_{Pol}$ definition), and a learning-by-doing parameter ($lbd$) that gives the fraction reduction in costs for each doubling (here definied relative to an initial $\gamma_{0}$ value):
 $$\gamma_{t}=\gamma_{0}*(1+lbd)^{log_2(M_{Pol,t-1}/\gamma_{0})}$$
-<p style="font-size:14pt">Note that the exponent gives the number of doublings relative to the initial $\gamma$ value. This is a representation of a "single-factor learning curve" described by Rubin et al. (2015). Their review gives ranges for the $lbd$ parameter between 0 and 30%.</p>
+<p style="font-size:14pt">Note that the exponent gives the number of doublings relative to the initial $\gamma$ value. This is a representation of a "single-factor learning curve" described by Rubin et al. (2015). Their review gives ranges for the $lbd$ parameter between 0 and 30%. A preferred estimate of $\gamma_{0}$ is based on a calibration to Andersson (2019), who estimate the effects of the Swedish carbon tax on emissions. This calibration suggests a $\gamma_{0}$ value of approximately 2.5%. </p>
 
 <p style="font-size:14pt">The half-life of mitigation investment, $r$, is assumed for simplicity to be linear in $Policy$ from an initial value, $r_{0}$ to a maximum value, $\delta$:
-$$r_{t}=min(r_{0}*(1+Policy_{t}),\delta)$$</p>
+$$r_{t}=min(r_{0}*(1+\frac{Policy_{t}}{10}),\delta)$$</p>
 <p style="font-size:14pt">The policy-induced mitigation in time t is given by the sum of the current effects of mitigation in all previous time periods: 
 $$M_{pol,t}=\sum_{i=1}^{t} m_{i}e^{-(t-i)*r_{i}}$$</p>
 <p style="font-size:14pt">Therefore, emissions in period t are given by:
