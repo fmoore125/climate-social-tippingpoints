@@ -4,6 +4,8 @@ library(tidyverse)
 library(patchwork)
 library(data.table)
 library(factoextra)
+library(MASS)
+
 
 #test number - practice kmeans on smaller dataset
 tn=length(mcmods)
@@ -27,25 +29,27 @@ df_scaled=scale(df)
 nacols=which(apply(df_scaled,MARGIN=2,function(x) sum(is.na(x)))==tn)
 df_scaled=df_scaled[,-nacols]
 
+emissionscols=c(grep("Emissions",colnames(df_scaled)),grep("Policy",colnames(df_scaled)))
+
 #visualize ideal number of clusters
 nclustertest=2:10
 wss=numeric(length=length(nclustertest))
 for(i in 1:length(nclustertest)){
-  wss[i]=kmeans(df_scaled,nclustertest[i])$tot.withinss
+  wss[i]=kmeans(df_scaled[,emissionscols],nclustertest[i])$tot.withinss
   print(i)
 }
 x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
-nclus=5
+nclus=6
 set.seed(1987)
-test=kmeans(df_scaled,nclus)
+test=kmeans(df_scaled[,emissionscols],nclus)
 
 #plot outcomes over time for different clusters
 df$cluster=test$cluster
 
 clems=df%>%
-  select(cluster,contains("Emissions"))%>%
+  dplyr::select(c(cluster,contains("Emissions")))%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
@@ -54,14 +58,14 @@ clems$variable=rep(years,each=nclus)
 colnames(clems)=c("cluster","year","Emissions")
 clems$cluster=as.factor(clems$cluster)
 
-cols=c("#469BEC", "#C9FAFF", "#F1E3B6", "#C4878C", "#6D882B")
+cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#453947")
 a=ggplot(clems,aes(x=year,y=Emissions,group=cluster,col=cluster))+geom_line(lwd=2)+theme_bw()
 a=a+scale_color_manual(values=cols)+labs(x="Year",color="Cluster")
 
 
 
 clpol=df%>%
-  select(cluster,contains("Policy"))%>%
+  dplyr::select(cluster,contains("Policy"))%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
@@ -77,7 +81,7 @@ x11()
 b+a+plot_layout(ncol=2)
 
 clops=df%>%
-  select(cluster,paste0("Oppose",years),paste0("Neutral",years))%>%
+  dplyr::select(cluster,paste0("Oppose",years),paste0("Neutral",years))%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
@@ -92,7 +96,7 @@ clops$Support=1-(clops$Neutral+clops$Oppose)
 clops=reshape2::melt(clops,id.vars=c("cluster","year"))
 
 clad=df%>%
-  select(cluster,contains("Adopt"))%>%
+  dplyr::select(cluster,contains("Adopt"))%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
@@ -122,3 +126,16 @@ c=c+scale_fill_manual(values=cols2)+labs(x="Year",y="Fraction of Population",fil
 c=c+theme(strip.background = element_rect(fill="White"))
 x11()
 c
+
+#discriminant analysis
+pgrid_cluster=scale(pgrid)
+pgrid_cluster=data.frame(pgrid_cluster,cluster=df$cluster)
+pgrid_cluster=pgrid_cluster%>%
+  group_by(cluster)%>%
+  summarize_all(mean)
+
+pgrid_cluster=melt(pgrid_cluster,id.var="cluster")
+pgrid_cluster$cluster=as.factor(pgrid_cluster$cluster)
+
+d=ggplot(pgrid_cluster,aes(x=variable,y=value,group=cluster,fill=cluster))+geom_bar(stat="identity",position="dodge")
+d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()
