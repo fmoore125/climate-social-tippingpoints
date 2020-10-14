@@ -14,5 +14,10 @@ Oppose = Dismissive + Doubtful
 Neutral = Disenganged + Cautious
 Support = Concerned + Alarmed
 
+ypcc_sixamericas_timeseries - https://climatecommunication.yale.edu/publications/global-warmings-six-americas-in-2020/
+Citation:
+Leiserowitz, A., Marlon, J., Wang, X., Bergquist, P., Goldberg, M., Kotcher, J., Maibach, E., Rosenthal, S. (2020). Global Warming’s Six Americas in 2020. New Haven, CT: Yale Program on Climate Change Communication. 
+
+
 ypcc_policysupport - https://climatecommunication.yale.edu/visualizations-data/americans-climate-views/
 Fraction supporting "Regulate CO2 as a pollutant"
