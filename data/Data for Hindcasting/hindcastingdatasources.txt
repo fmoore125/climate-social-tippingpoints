@@ -21,3 +21,9 @@ Leiserowitz, A., Marlon, J., Wang, X., Bergquist, P., Goldberg, M., Kotcher, J.,
 
 ypcc_policysupport - https://climatecommunication.yale.edu/visualizations-data/americans-climate-views/
 Fraction supporting "Regulate CO2 as a pollutant"
+
+Emissions:
+From IIASA SSP Database: https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=50
+Historical emissions (2010 - 2015) are van Marle et al (2017) and Hoesly et al (2018)
+Total CO2 emissions
+Assume non-CO2 RF constant at 0.5 Wm-2 between 2010 and 2015
