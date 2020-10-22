@@ -1,5 +1,9 @@
 library(ggplot2)
 library(plot.matrix)
+library(data.table)
+library(tidyverse)
+library(reshape2)
+library(patchwork)
 
 source("src/model_parametertune.R")
 
@@ -86,3 +90,175 @@ postcov[which(upper.tri(postcov))]=NA
 x11()
 par(mar=c(9,9,1,6))
 plot(postcov[-1,-9],axis.col=list(side=1,las=2),axis.row=list(side=2,las=1),xlab="",ylab="",main="",na.col="grey",col=c('#fc8d59','#fee08b','#d9ef8b','#91cf60','#1a9850'))
+
+params_tot=cbind(params,sampleweight)
+colnames(params_tot)=c(as.character(covparamserror$params),"sampleweight")
+
+fwrite(params_tot,file="data/MC Runs/parameter_tune.csv")
+
+#-----Code to fit m_max and r_max given Andersson 2019 study of the effects of carbon tax in Sweden --------------
+
+#Andersson finds a mean Swedish CO2 tax over the 1991 - 2005 period reduced emissions by 12.5% in 2005
+#simulate emissions reduction under real policy values given range of m_max and r_max to fit observations
+
+tax=c(rep(30,9),seq(44,109,length.out=6)) #based on descriptions of Swedish tax scheme
+
+nsamp=10000
+testgrid=matrix(nrow=nsamp,ncol=2)
+for(i in 1:nsamp){
+  testgrid[i,1]=runif(1,min=0.01,max=0.1)
+  testgrid[i,2]=runif(1,min=5,max=70)
+}
+
+#simulate policy effect using emissions module
+
+mitigationcalibration=function(policy,mmax_t,rmax,r0=2){
+  mit=matrix(nrow=length(policy),ncol=length(policy))
+    for(i in 1:length(policy)){
+     m_t=mmax_t*log(policy[i])/log(300) #300 is maximum value policy can take
+     #lifetime of investments also depends on policy
+     r_t=min(r0*(1+policy[i]/10),rmax)
+     #add effect of current policy
+     #mitigation is a t*t matrix of zeroes - fill in columns representing persistent effect of yearly mitigation activity
+     futuretime=i:length(policy)-i
+     mit[,i]=c(rep(0,i-1),m_t*exp(-futuretime/r_t))
+   }
+   totmit=rowSums(mit)
+   return(totmit[length(policy)]*100)
+ }
+
+ calib=numeric(length=dim(testgrid)[1])
+ for(j in 1:length(calib)){
+   calib[j]=mitigationcalibration(tax,testgrid[j,1],testgrid[j,2])
+ }
+ 
+testerror=sqrt((calib-12.5)^2)
+testerror=(testerror-mean(testerror))/sd(testerror)
+sampleweight=(-1*testerror)-min(-1*testerror) #convert to strictly positive metric increasing in model performance
+sampleweight=sampleweight/sum(sampleweight) #convert to "probability"
+
+x11()
+par(mfrow=c(1,2))
+titles=c("Max Annual Mitigation","Max Mitigation Scaling")
+xlabs=c("Fraction Emissions","Years")
+for(i in 1:dim(testgrid)[2]){
+  priordens=density(testgrid[,i])
+  postdens=density(testgrid[,i],weights=sampleweight)
+  plot(x=priordens$x,y=priordens$y,col="#135678",lwd=2,xlab=xlabs[i],ylab="Density",main=titles[i],las=1,type="l",ylim=range(c(priordens$y,postdens$y)),cex=1.5)
+  lines(x=postdens$x,y=postdens$y,col="#84c3a0",lwd=2)
+  if(i==1) legend("topright",legend=c("Prior","Posterior"),lwd=2,col=c("#135678","#84c3a0"),bty="n",cex=1.5)
+}
+testgrid=cbind(testgrid,sampleweight)
+colnames(testgrid)=c("m_max","r_max","sampleweight")
+
+fwrite(testgrid,file="data/MC Runs/parameter_tune_mitigation.csv")
+
+#-------------Monte Carlo of full model, with mitigation, policy, and option parameters weighted by tuning-derived probability----------
+source("src/model.R")
+
+polopparams=fread("data/MC Runs/parameter_tune.csv")
+mitparams=fread("data/MC Runs/parameter_tune_mitigation.csv")
+
+#initial opinion distribution - not varied, but fixed at particular values from Yale Climate Communications Project
+frac_opp_01=0.26 #doubtful and dismissive (global warming 6 americas)
+frac_neut_01=0.33 #cautious and disengaged (global warming 6 americas)
+
+mc=100000
+params=matrix(nrow=mc,ncol=21)
+pol=matrix(nrow=mc,ncol=86);ems=matrix(nrow=mc,ncol=86)
+
+for(i in 1:mc){
+  #draw mitigation, policy and opinion parameters, weighting by tuned probability
+  polops=as.numeric(polopparams[sample(1:dim(polopparams)[1],size=1,prob=polopparams$sampleweight),1:9])
+  homophily_param1=polops[1];forcestrong1=polops[2];forceweak1=polops[3];evidenceeffect1=polops[4];policyopinionfeedback_01=polops[5]
+  pol_response1=polops[6];pol_feedback1=polops[7];biassedassimilation1=polops[8];shiftingbaselines1=polops[9]
+  
+  mit=as.numeric(mitparams[sample(1:dim(mitparams)[1],size=1,prob=mitparams$sampleweight),1:2])
+  m_max1=mit[1];r_max1=mit[2]
+  
+  #uniform sampling of other model parameters -mostly adoption-related
+  ced_param1=runif(1,0,0.5)
+  policy_pbcchange_max1=runif(1,0,1)
+  pbc_01=runif(1,-2,0)
+  pbc_steep1=runif(1,1,3)
+  opchangeparam=runif(1,0,1);pbc_opinionchange1=c(opchangeparam,0,-1*opchangeparam) #constrain opinion effect on adoption to be symmetric for opposers and supporters
+  etc_total1=runif(1,0,2)
+  normeffect1=runif(1,0,1)
+  adopt_effect1=runif(1,0,0.3)
+  lbd_param01=runif(1,0,0.3)
+  lag_param01=round(runif(1,0,30))
+  
+  m=model()
+  #save output
+  params[i,]=c(polops,mit,ced_param1,policy_pbcchange_max1,pbc_01,pbc_steep1,opchangeparam,etc_total1,normeffect1,adopt_effect1,lbd_param01,lag_param01)
+  pol[i,]=m$policy;ems[i,]=m$totalemissions
+  
+  if(i%%1000==0) print(i)
+}
+colnames(params)=c(colnames(polopparams)[1:9],colnames(mitparams)[1:2],"ced","policy_pbc","pbc_init","pbc_steep","policy_adoption","etc_total","normeffect","adopt_effect","lbd_param","lag_param")
+fwrite(params,file="data/MC Runs/MC Runs_TunedParams/params.csv")
+fwrite(pol,file="data/MC Runs/MC Runs_TunedParams/policy.csv")
+fwrite(ems,file="data/MC Runs/MC Runs_TunedParams/emissions.csv")
+
+####------kmeans clustering of tuned output---------
+df=cbind(pol,ems)
+df_scaled=scale(df)
+#drop zero variance columns
+nacols=which(apply(df_scaled,MARGIN=2,function(x) sum(is.na(x)))==mc)
+df_scaled=df_scaled[,-nacols]
+
+#visualize ideal number of clusters
+nclustertest=2:10
+wss=numeric(length=length(nclustertest))
+for(i in 1:length(nclustertest)){
+  wss[i]=kmeans(df_scaled,nclustertest[i])$tot.withinss
+  print(i)
+}
+x11()
+plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
+
+#six clusters looks good
+nclus=6
+set.seed(1987)
+test=kmeans(df_scaled,nclus)
+
+#plot outcomes over time for different clusters
+ems=as.data.frame(ems)
+ems$cluster=test$cluster
+
+clems=ems%>%
+  group_by(cluster)%>%
+  summarize_all(mean)
+colnames(clems)=c("cluster",2015:2100)
+clems=melt(clems,id.vars="cluster")
+colnames(clems)=c("Cluster","Year","Emissions")
+clems$Cluster=as.factor(clems$Cluster)
+
+nruns=data.frame(table(ems$cluster))
+colnames(nruns)=c("Cluster","nsims")
+nruns$nsims=nruns$nsims/mc*100
+clems$Year=as.numeric(as.character(clems$Year))
+
+clems=merge(clems,nruns)
+
+cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#453947")
+a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
+a=a+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs")
+pol=as.data.frame(pol)
+pol$cluster=test$cluster
+
+clpol=pol%>%
+  group_by(cluster)%>%
+  summarize_all(mean)
+colnames(clpol)=c("cluster",2015:2100)
+clpol=melt(clpol,id.vars="cluster")
+colnames(clpol)=c("Cluster","Year","Policy")
+clpol$Cluster=as.factor(clpol$Cluster)
+clpol=merge(clpol,nruns)
+clpol$Year=as.numeric(as.character(clpol$Year))
+
+b=ggplot(clpol,aes(x=Year,y=Policy,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
+b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs")+ theme(legend.position="none")
+
+x11()
+b+a+plot_layout(ncol=2)

@@ -152,41 +152,4 @@ biassedassimilation1=0
 #a value of 1 means baselines shift according to pareameters estimated in Moore et al 2019
 shiftingbaselines1=0
 
-#-----Code to fit m_max and r_max given Andersson 2019 study of the effects of carbon tax in Sweden --------------
-
-# #Andersson finds a mean Swedish CO2 tax over the 1991 - 2005 period reduced emissions by 12.5% in 2005
-# #simulate emissions reduction under real policy values given range of m_max and r_max to fit observations
-# 
-# tax=c(rep(30,9),seq(44,109,length.out=6)) #based on descriptions of Swedish tax scheme
-# 
-# mmax_test=seq(0.01,0.1,length.out=50)
-# rmax_test=seq(5,70,length.out = 50)
-# testgrid=expand.grid(mmax_test,rmax_test)
-# 
-# #simulate policy effect using emissions module
-# 
-# mitigationcalibration=function(policy,mmax_t,rmax,r0=2){
-#   mit=matrix(nrow=length(policy),ncol=length(policy))
-#   for(i in 1:length(policy)){
-#     m_t=mmax_t*log(policy[i])/log(300) #300 is maximum value policy can take
-#     #lifetime of investments also depends on policy
-#     r_t=min(r0*(1+policy[i]/10),rmax)
-#     #add effect of current policy
-#     #mitigation is a t*t matrix of zeroes - fill in columns representing persistent effect of yearly mitigation activity
-#     futuretime=i:length(policy)-i
-#     mit[,i]=c(rep(0,i-1),m_t*exp(-futuretime/r_t))
-#   }
-#   totmit=rowSums(mit)
-#   return(totmit[length(policy)]*100)
-# }
-# 
-# calib=numeric(length=dim(testgrid)[1])
-# for(j in 1:length(calib)){
-#   calib[j]=mitigationcalibration(tax,testgrid[j,1],testgrid[j,2])
-# }
-# 
-# #parameter combinations that perform well:
-# good=testgrid[which(abs(calib-12.5)<1),] #runs with less than 1pp difference with Anderssson estimate of 12.5% reduction in 2005
-# #note m_max is tightly clustered around 8%
-# #provides no contraints on rmax though (likely as too short a time period)
 

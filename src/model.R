@@ -130,7 +130,7 @@ model=function(time=1:86,
     bau_temp[t,]=temp4[[2]]
     weather[t]=temperature[t,1]+naturalvariability[t]
     
-    temp5=anomaly(weather,t,biassedassimilation,shiftingbaselines)
+    temp5=anomalyfunc(weather,t,biassedassimilation,shiftingbaselines)
     anomaly[t]=temp5[[1]]
     evidence[t,]=temp5[[2]]
     

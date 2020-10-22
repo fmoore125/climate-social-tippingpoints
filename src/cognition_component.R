@@ -2,7 +2,7 @@
 
 #shifting baseline (weights parameter) implemented based on esimtated parameters from Moore et al. 2019
 
-anomaly=function(weather,t,biassed_assimilation=0,shifting_baseline=0,weights=c(0.23,0.20,0.17,0.14,0.11,0.09,0.06),temp0=temp_0[1]){
+anomalyfunc=function(weather,t,biassed_assimilation=0,shifting_baseline=0,weights=c(0.23,0.20,0.17,0.14,0.11,0.09,0.06),temp0=temp_0[1]){
   if(shifting_baseline==0) anomaly=weather[t]
   if(shifting_baseline==1){
     if(t==2) anomaly=weather[t]-temp0
