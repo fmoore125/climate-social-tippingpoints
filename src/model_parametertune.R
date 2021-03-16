@@ -7,7 +7,22 @@ source("src/climate_component.R")
 source("src/cognition_component.R")
 load("data/naturalvariability.Rdat")
 
-model=function(time=1:86,
+#load historic emissions
+emissions=read.csv("data/Data for Hindcasting/emissions/historicalemissions.csv")
+bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau_outside1=emissions[,4]/1000*12/(12+16+16)
+ex_forcing1=emissions[,5]
+
+#load historic opinion data for initialization
+op=read.csv("data/Data for Hindcasting/opinion/ypcc_sixamericas_final.csv")
+frac_opp_01=op[1,4]
+frac_neut_01=op[1,3]
+
+#initialize initial policy level as well
+pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices.csv")
+policy_01=pol[2,6]
+
+model_tune=function(time=1:11,
                homophily_param=homophily_param1,
                frac_opp_0=frac_opp_01,
                frac_neut_0=frac_neut_01,
@@ -40,12 +55,12 @@ model=function(time=1:86,
                evidenceeffect=evidenceeffect1,
                biassedassimilation=biassedassimilation1,
                shiftingbaselines=shiftingbaselines1,
-               year0=2015,
+               year0=2010,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
                lbd_param=lbd_param01,
                lag_param=lag_param01
-               ){
+){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
   
@@ -130,7 +145,7 @@ model=function(time=1:86,
     bau_temp[t,]=temp4[[2]]
     weather[t]=temperature[t,1]+naturalvariability[t]
     
-    temp5=anomalyfunc(weather,t,biassedassimilation,shiftingbaselines)
+    temp5=anomaly(weather,t,biassedassimilation,shiftingbaselines)
     anomaly[t]=temp5[[1]]
     evidence[t,]=temp5[[2]]
     
@@ -140,7 +155,7 @@ model=function(time=1:86,
   
   return(a)
 }
-  
+
 
 
 
