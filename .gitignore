@@ -53,6 +53,10 @@ vignettes/*.pdf
 #Monte Carlo output
 /data/MC Runs/
 
+#output
+/writingup
+
+
 #Knitted Rmarkdown files
 *.html
 
