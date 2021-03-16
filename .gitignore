@@ -50,6 +50,9 @@ vignettes/*.pdf
 # References folder
 /data/References/
 
+# output folder
+/writingup/
+
 #Monte Carlo output
 /data/MC Runs/
 
