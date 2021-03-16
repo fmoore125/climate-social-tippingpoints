@@ -262,3 +262,22 @@ b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Ru
 
 x11()
 b+a+plot_layout(ncol=2)
+
+#parameter combinations associated with each cluster
+params_cluster=scale(params)
+params_cluster=data.frame(params_cluster,cluster=test$cluster)
+params_cluster=params_cluster%>%
+  group_by(cluster)%>%
+  summarize_all(mean)
+
+colnames(params_cluster)=c("Cluster",colnames(params_cluster)[2:10],"Max Mit. Rate","Max Mit Time","CED","Policy-PBC","PBC_Init","PBC_Steep","Policy-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time")
+#drop weak force as it doesn't add anything interesting over just the strong force
+params_cluster=params_cluster[,-which(colnames(params_cluster)=="Weak.Force")]
+
+params_cluster=melt(params_cluster,id.var="Cluster")
+params_cluster$Cluster=as.factor(params_cluster$Cluster)
+
+
+d=ggplot(params_cluster,aes(x=variable,y=value,group=Cluster,fill=Cluster))+geom_bar(stat="identity",position="dodge")
+d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()+theme(axis.text.x = element_text(angle = 90))
+
