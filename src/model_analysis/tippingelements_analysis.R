@@ -44,6 +44,7 @@ x11()
 a
 
 #2. Technical Change
+source("src/model.R")
 homophily_param1=0.75
 frac_opp_01=0.2
 frac_neut_01=0.50
@@ -76,7 +77,7 @@ x11()
 a
 
 #3. Perception of Climate Change
-
+source("src/model.R")
 frac_opp_01=0.26 #doubtful and dismissive (global warming 6 americas)
 frac_neut_01=0.33 #cautious and disengaged (global warming 6 americas)
 policyopinionfeedback_01=0

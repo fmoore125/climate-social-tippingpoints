@@ -4,8 +4,9 @@ library(data.table)
 library(tidyverse)
 library(reshape2)
 library(patchwork)
+library(forcats)
 
-source("src/model_parametertune.R")
+source("src/model_analysis/model_parametertune.R")
 
 #subset of variable to vary - those in the opinion and policy components
 
@@ -201,6 +202,11 @@ fwrite(pol,file="data/MC Runs/MC Runs_TunedParams/policy.csv")
 fwrite(ems,file="data/MC Runs/MC Runs_TunedParams/emissions.csv")
 
 ####------kmeans clustering of tuned output---------
+params=fread("data/MC Runs/MC Runs_TunedParams/params.csv")
+pol=fread("data/MC Runs/MC Runs_TunedParams/policy.csv")
+ems=fread("data/MC Runs/MC Runs_TunedParams/emissions.csv")
+mc=dim(params)[1]
+
 df=cbind(pol,ems)
 df_scaled=scale(df)
 #drop zero variance columns
@@ -210,6 +216,7 @@ df_scaled=df_scaled[,-nacols]
 #visualize ideal number of clusters
 nclustertest=2:10
 wss=numeric(length=length(nclustertest))
+set.seed(1987)
 for(i in 1:length(nclustertest)){
   wss[i]=kmeans(df_scaled,nclustertest[i])$tot.withinss
   print(i)
@@ -241,12 +248,16 @@ clems$Year=as.numeric(as.character(clems$Year))
 
 clems=merge(clems,nruns)
 
-cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#453947")
-a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
-a=a+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs")
+#add names of scenarios and order from most to least common
+clems$Cluster=fct_relevel(clems$Cluster, "5","2","4","3","6")
+clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+
+cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#c42449")
+a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()+theme(text=element_text(size=16))
+a=a+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs",y="Global Emissions (GtC per year)")+guides(color = guide_legend(override.aes = list(size = 2))) 
+
 pol=as.data.frame(pol)
 pol$cluster=test$cluster
-
 clpol=pol%>%
   group_by(cluster)%>%
   summarize_all(mean)
@@ -257,8 +268,12 @@ clpol$Cluster=as.factor(clpol$Cluster)
 clpol=merge(clpol,nruns)
 clpol$Year=as.numeric(as.character(clpol$Year))
 
+clpol$Cluster=fct_relevel(clpol$Cluster, "5","2","4","3","6")
+clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+
+
 b=ggplot(clpol,aes(x=Year,y=Policy,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
-b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs")+ theme(legend.position="none")
+b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs",y="Climate Policy Stringency")+ theme(legend.position="none",text=element_text(size=16))
 
 x11()
 b+a+plot_layout(ncol=2)
@@ -277,7 +292,43 @@ params_cluster=params_cluster[,-which(colnames(params_cluster)=="Weak.Force")]
 params_cluster=melt(params_cluster,id.var="Cluster")
 params_cluster$Cluster=as.factor(params_cluster$Cluster)
 
+params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "5","2","4","3","6")
+params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+
+#order parameters to group by component
+params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-PBC","PBC_Init","PBC_Steep","Policy-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biassed.Assimilation","Shifting.Baselines")
+  
+  fct_relevel(sizes, "small", "medium", "large")
 
 d=ggplot(params_cluster,aes(x=variable,y=value,group=Cluster,fill=Cluster))+geom_bar(stat="identity",position="dodge")
 d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()+theme(axis.text.x = element_text(angle = 90))
+
+#run cluster emissions paths through the climate component to generate temperature trajectories
+
+emissionssplit=split(clems,clems$Cluster)
+source("src\\climate_component.R")
+
+cltemp=data.frame(Year=2015:2100)
+
+for(i in 1:length(emissionssplit)){
+ 
+  emissions_dat=emissionssplit[[i]]$Emissions[order(emissionssplit[[i]]$Year)]
+  
+  #initialize ocean and atmosphere and carbon masses
+  temperature=matrix(nrow=length(emissions_dat),ncol=2)
+  temperature[1,]=temp_0
+  
+  mass=matrix(nrow=length(emissions_dat),ncol=3)
+  mass[1,]=mass_0
+  
+  for(t in 2:length(emissions_dat)){
+    temp3=temperaturechange(temperature[t-1,],mass[t-1,],emissions_dat[t],ex_forcing1[t],psi1_param=psi1,nu_param=nu)
+    mass[t,]=temp3[[1]]
+    temperature[t,]=temp3[[2]]
+    mass[t,]=temp3[[1]]
+    temperature[t,]=temp3[[2]]
+  } 
+  cltemp=cbind(cltemp,temperature[,1])
+}
+  
 

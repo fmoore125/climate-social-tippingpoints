@@ -118,8 +118,6 @@ model=function(time=1:86,
     totalemissions[t]=temp2[[3]]
     
     #climate model
-    psi1=0.022
-    nu=3
     
     temp3=temperaturechange(temperature[t-1,],mass[t-1,],totalemissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
     mass[t,]=temp3[[1]]

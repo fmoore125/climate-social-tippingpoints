@@ -3,7 +3,7 @@
 #initial values are updated based on DICE2016 for a 2015 start year
 
 mass_0=c(851,460,1740) #initial mass of carbon in atmosphere, upper ocean, lower ocean (GtC)
-temp_0=c(0.85,0.068) #warming of atomsphere and lower ocean in 2015
+temp_0=c(0.85,0.068) #warming of atomsphere and lower ocean in 2015 - update to more accurate number? 0.85 is probably too low
 psi1=0.022
 nu=3.8
 forc_param=3.8

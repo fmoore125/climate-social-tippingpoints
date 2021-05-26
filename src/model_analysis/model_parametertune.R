@@ -20,7 +20,7 @@ frac_neut_01=op[1,3]
 
 #initialize initial policy level as well
 pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices.csv")
-policy_01=pol[2,6]
+policy_01=pol[3,6]
 
 model_tune=function(time=1:11,
                homophily_param=homophily_param1,
