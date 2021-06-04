@@ -7,7 +7,7 @@ source("src/climate_component.R")
 source("src/cognition_component.R")
 load("data/naturalvariability.Rdat")
 
-model=function(time=1:86,
+model=function(time=1:81,
                homophily_param=homophily_param1,
                frac_opp_0=frac_opp_01,
                frac_neut_0=frac_neut_01,
@@ -40,7 +40,7 @@ model=function(time=1:86,
                evidenceeffect=evidenceeffect1,
                biassedassimilation=biassedassimilation1,
                shiftingbaselines=shiftingbaselines1,
-               year0=2015,
+               year0=2020,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
                lbd_param=lbd_param01,

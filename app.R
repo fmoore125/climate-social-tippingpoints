@@ -126,7 +126,7 @@ server <- function(input, output, session) {
   output$temperaturePlot <- renderPlot({
     mod=m()
     temp=melt(data.frame(Time=mod$year,Emissions=mod$temp[,1],BAU=mod$bau_temp[,1]),id.vars="Time",variable.name="Scenario",value.name="Temperature")
-    ggplot(temp,aes(x=Time,y=Temperature,group=Scenario,col=Scenario))+geom_line(lwd=2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Temperature Change (Degrees Above Pre-Industrial)",x="",y="")+
+    ggplot(temp,aes(x=Time,y=Temperature,group=Scenario,col=Scenario))+geom_line(lwd=2)+theme_bw()+theme(text = element_text(size=20),legend.position=c(0.2,0.8))+labs(title="Temperature Change (Degrees Above 1900)",x="",y="")+
       scale_color_manual(values=c("#142c31","#efbd13"),labels=c("Temp Change","BAU Temp Change"))
   })
 }

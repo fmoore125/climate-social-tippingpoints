@@ -17,8 +17,8 @@ forcing=function(m_at_t,ex_forcing_t,m_at_0=596.4,nu_param=nu){
 }
 
 #temperature transition matrix for temperature in atmosphere and lower ocean
-#parameters from DICE2016 annualized using formula in Cai, Judd and Lontzek
-phi_temp=matrix(c(1-(0.010+0.047),0.0048,0.010,(1-0.0048)),byrow=TRUE,nrow=2)
+#parameters from DICE2007 annualized using Cai and Lontzek 2019
+phi_temp=matrix(c(1-(0.01+0.047),0.01,0.0048,(1-0.0048)),byrow=TRUE,nrow=2)
 
 temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,psi1_param=psi1,nu_param=nu,mass_0_param=mass_0,
                            phi_carbon_param=phi_carbon,phi_temp_param=phi_temp){
@@ -44,7 +44,7 @@ init_mass=matrix(nrow=length(years),ncol=3)
 init_mass[1,]=mass_0
 
 for(t in 2:length(years)){
-  temp3=temperaturechange(temperature[t-1,],mass[t-1,],emissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+  temp3=temperaturechange(init_temperature[t-1,],init_mass[t-1,],emissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
   init_mass[t,]=temp3[[1]]
   init_temperature[t,]=temp3[[2]]
 }
