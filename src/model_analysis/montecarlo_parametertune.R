@@ -54,7 +54,7 @@ for(i in 1:nsim){
 #get relative performace - standardize across all model runs
 operror=(operror-mean(operror))/sd(operror)
 polerror=(polerror-mean(polerror))/sd(polerror)
-toterror=(operror+polerror)/2
+toterror=(operror+polerror)/2 #weight by quality of data? or try different weighting
 
 cor=apply(params,MARGIN=2,function(x) cor(x,toterror))
 covparamserror=data.frame(params=c("Homophily","Strong Force","Weak Force","Evidence","Pol-Opinion","Status-Quo Bias","Pol Int Feedback","Biassed Assimilation","Shifting Baselines"),cor=cor)
