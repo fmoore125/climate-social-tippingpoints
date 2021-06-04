@@ -1,11 +1,8 @@
-#DICE 2007 climate model, annualized using parameters in Cai and Lontzek 2019
-#takes CO2 emissions and gives global temperatures
-#initial values are based on 2020 values - calculated by running the model from 2005 - 2020 using observed emissions 2005-2019
+# get carbon mass and temperature values to initialize climate model in 2020
+# given initial values for 2005 and global emissions 2005-2020
 
-source("src/utility_scripts/initialize climate model.R")
-
-mass_0=init_mass[16,] #initial mass of carbon in atmosphere, upper ocean, lower ocean (GtC) in 2020, from initializing climate model in 2005
-temp_0=init_temperature[16,] #warming of atomsphere and lower ocean in 2020 relative to 1900 - 1.08 degrees air, 0.13 degrees ocean
+mass_0=c(808.9,1255,18365) #initial (2005) mass of carbon in atmosphere, upper ocean, lower ocean (GtC)
+temp_0=c(0.7307,0.0068) #warming above 1900 in 2005
 psi1=0.037
 nu=3.8
 
@@ -20,7 +17,7 @@ forcing=function(m_at_t,ex_forcing_t,m_at_0=596.4,nu_param=nu){
 }
 
 #temperature transition matrix for temperature in atmosphere and lower ocean
-#parameters from DICE2016 annualized using formula in Cai, Judd and Lontzek
+#parameters from DICE2007 annualized using Cai and Lontzek 2019
 phi_temp=matrix(c(1-(0.01+0.047),0.01,0.0048,(1-0.0048)),byrow=TRUE,nrow=2)
 
 temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,psi1_param=psi1,nu_param=nu,mass_0_param=mass_0,
@@ -30,3 +27,26 @@ temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,psi1_param
   temp_t=phi_temp%*%temp_t_1+c(psi1_param*forcing_t,0)
   return(list(mass_t,temp_t))
 }
+
+#get exogenous forcing and emissions for 2005-2020
+ems=read.csv("data/emissions_forcing_climateinitialization.csv")
+
+emissions=ems[,5]
+ex_forcing=ems[,2]
+
+#run climate model
+years=2005:2020
+
+init_temperature=matrix(nrow=length(years),ncol=2)
+init_temperature[1,]=temp_0
+
+init_mass=matrix(nrow=length(years),ncol=3)
+init_mass[1,]=mass_0
+
+for(t in 2:length(years)){
+  temp3=temperaturechange(init_temperature[t-1,],init_mass[t-1,],emissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+  init_mass[t,]=temp3[[1]]
+  init_temperature[t,]=temp3[[2]]
+}
+
+#initialize main climate model using 2020 values for carbon mass and temperature 
