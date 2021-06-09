@@ -29,7 +29,7 @@ params=expand.grid(adoption_param,cred_param,lbd_par)
 ems_output=numeric()
 for(i in 1:dim(params)[1]){
   m=model(pbc_opinionchange=c(0,0,-1*params[i,1]),ced_param=params[i,2],lbd_param=params[i,3])
-  ems_output[i]=m$totalemissions[86] #extract cumulative emissions for 2020-2100
+  ems_output[i]=m$totalemissions[81] #extract cumulative emissions for 2020-2100
 }
 
 params$emissions=ems_output
@@ -62,7 +62,7 @@ params=expand.grid(lbd_sweep,fracsupp_sweep,sq_sweep)
 ems_output=numeric()
 for(i in 1:dim(params)[1]){
   m=model(lbd_param=params[i,1],frac_opp_0=0.5-params[i,2],pol_response=params[i,3])
-  ems_output[i]=sum(m$totalemissions[6:86])
+  ems_output[i]=sum(m$totalemissions[1:81])
 }
 
 params$emissions=ems_output
@@ -78,8 +78,8 @@ a
 
 #3. Perception of Climate Change
 source("src/model.R")
-frac_opp_01=0.26 #doubtful and dismissive (global warming 6 americas)
-frac_neut_01=0.33 #cautious and disengaged (global warming 6 americas)
+frac_opp_01=0.19 #doubtful and dismissive (global warming 6 americas)
+frac_neut_01=0.27 #cautious and disengaged (global warming 6 americas)
 policyopinionfeedback_01=0
 
 biassedass_sweep=seq(0,0.9,by=0.05)
@@ -119,6 +119,6 @@ params$networkhomophily=as.factor(params$networkhomophily);params$networkhomophi
 a=ggplot(params,aes(x=biassed_assimilation,y=evidenceeffect,fill=opposers2050*100))+geom_tile()
 a=a+facet_grid(networkhomophily~shiftingbaseline)+labs(x="Biassed Assmiliation",y="Effect of Perceived Weather on Opinion",fill="Policy Opposers\n2050 (%)")
 a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
-a=a+scale_fill_gradient(low="green",high="darkorchid")
+a=a+scale_fill_gradient(low="darkorchid",high="palegreen2")
 x11()
 a

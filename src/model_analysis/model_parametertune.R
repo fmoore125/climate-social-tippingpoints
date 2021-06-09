@@ -3,7 +3,6 @@ source("src/opinions_component.R")
 source("src/policy_component.R")
 source("src/adoption_component.R")
 source("src/emissions_component.R")
-source("src/climate_component.R")
 source("src/cognition_component.R")
 load("data/naturalvariability.Rdat")
 
@@ -21,6 +20,12 @@ frac_neut_01=op[1,3]
 #initialize initial policy level as well
 pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices.csv")
 policy_01=pol[3,6]
+
+#initialize carbon cycle and climate model at 2010 values
+source("src/utility_scripts/initialize climate model.R")
+source("src/climate_component.R")
+mass_0=init_mass[6,] #initial mass of carbon in atmosphere, upper ocean, lower ocean (GtC) in 2010, from initializing climate model in 2005
+temp_0=init_temperature[6,]
 
 model_tune=function(time=1:11,
                homophily_param=homophily_param1,
@@ -145,7 +150,7 @@ model_tune=function(time=1:11,
     bau_temp[t,]=temp4[[2]]
     weather[t]=temperature[t,1]+naturalvariability[t]
     
-    temp5=anomaly(weather,t,biassedassimilation,shiftingbaselines)
+    temp5=anomalyfunc(weather,t,biassedassimilation,shiftingbaselines)
     anomaly[t]=temp5[[1]]
     evidence[t,]=temp5[[2]]
     

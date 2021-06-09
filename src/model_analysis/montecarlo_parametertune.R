@@ -161,12 +161,12 @@ polopparams=fread("data/MC Runs/parameter_tune.csv")
 mitparams=fread("data/MC Runs/parameter_tune_mitigation.csv")
 
 #initial opinion distribution - not varied, but fixed at particular values from Yale Climate Communications Project
-frac_opp_01=0.26 #doubtful and dismissive (global warming 6 americas)
-frac_neut_01=0.33 #cautious and disengaged (global warming 6 americas)
+frac_opp_01=0.19 #doubtful and dismissive (global warming 6 americas)
+frac_neut_01=0.27 #cautious and disengaged (global warming 6 americas)
 
 mc=100000
 params=matrix(nrow=mc,ncol=21)
-pol=matrix(nrow=mc,ncol=86);ems=matrix(nrow=mc,ncol=86)
+pol=matrix(nrow=mc,ncol=81);ems=matrix(nrow=mc,ncol=81)
 
 for(i in 1:mc){
   #draw mitigation, policy and opinion parameters, weighting by tuned probability
@@ -225,7 +225,7 @@ x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
 #six clusters looks good
-nclus=6
+nclus=5
 set.seed(1987)
 test=kmeans(df_scaled,nclus)
 
