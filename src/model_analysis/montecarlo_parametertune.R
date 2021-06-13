@@ -216,17 +216,17 @@ df_scaled=df_scaled[,-nacols]
 #visualize ideal number of clusters
 nclustertest=2:10
 wss=numeric(length=length(nclustertest))
-set.seed(1987)
+set.seed(2090)
 for(i in 1:length(nclustertest)){
-  wss[i]=kmeans(df_scaled,nclustertest[i])$tot.withinss
+  wss[i]=kmeans(df_scaled,nclustertest[i],iter.max=20)$tot.withinss
   print(i)
 }
 x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
 #six clusters looks good
-nclus=5
-set.seed(1987)
+nclus=6
+set.seed(2090)
 test=kmeans(df_scaled,nclus)
 
 #plot outcomes over time for different clusters
@@ -236,7 +236,7 @@ ems$cluster=test$cluster
 clems=ems%>%
   group_by(cluster)%>%
   summarize_all(mean)
-colnames(clems)=c("cluster",2015:2100)
+colnames(clems)=c("cluster",2020:2100)
 clems=melt(clems,id.vars="cluster")
 colnames(clems)=c("Cluster","Year","Emissions")
 clems$Cluster=as.factor(clems$Cluster)
@@ -249,8 +249,8 @@ clems$Year=as.numeric(as.character(clems$Year))
 clems=merge(clems,nruns)
 
 #add names of scenarios and order from most to least common
-clems$Cluster=fct_relevel(clems$Cluster, "5","2","4","3","6")
-clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+clems$Cluster=fct_relevel(clems$Cluster, "5","1","4","6","3","2")
+clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="5","Aggresive Action"="1","Technical Challenges"="4","Delayed Recognition"="6","Little and Late"="2","Victim of Success"="3")
 
 cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#c42449")
 a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()+theme(text=element_text(size=16))
@@ -261,15 +261,15 @@ pol$cluster=test$cluster
 clpol=pol%>%
   group_by(cluster)%>%
   summarize_all(mean)
-colnames(clpol)=c("cluster",2015:2100)
+colnames(clpol)=c("cluster",2020:2100)
 clpol=melt(clpol,id.vars="cluster")
 colnames(clpol)=c("Cluster","Year","Policy")
 clpol$Cluster=as.factor(clpol$Cluster)
 clpol=merge(clpol,nruns)
 clpol$Year=as.numeric(as.character(clpol$Year))
 
-clpol$Cluster=fct_relevel(clpol$Cluster, "5","2","4","3","6")
-clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+clpol$Cluster=fct_relevel(clpol$Cluster, "5","1","4","6","3","2")
+clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="5","Aggresive Action"="1","Technical Challenges"="4","Delayed Recognition"="6","Little and Late"="2","Victim of Success"="3")
 
 
 b=ggplot(clpol,aes(x=Year,y=Policy,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
@@ -285,21 +285,19 @@ params_cluster=params_cluster%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
-colnames(params_cluster)=c("Cluster",colnames(params_cluster)[2:10],"Max Mit. Rate","Max Mit Time","CED","Policy-PBC","PBC_Init","PBC_Steep","Policy-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time")
+colnames(params_cluster)=c("Cluster",colnames(params_cluster)[2:10],"Max Mit. Rate","Max Mit Time","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time")
 #drop weak force as it doesn't add anything interesting over just the strong force
 params_cluster=params_cluster[,-which(colnames(params_cluster)=="Weak.Force")]
 
 params_cluster=melt(params_cluster,id.var="Cluster")
 params_cluster$Cluster=as.factor(params_cluster$Cluster)
 
-params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "5","2","4","3","6")
-params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="5","Aggresive Action"="2","Technical Challenges"="3","Delayed Recognition"="4","Business as Usual"="6","Victim of Success"="1")
+params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "5","1","4","6","3","2")
+params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="5","Aggresive Action"="1","Technical Challenges"="4","Delayed Recognition"="6","Little and Late"="2","Victim of Success"="3")
 
 #order parameters to group by component
-params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-PBC","PBC_Init","PBC_Steep","Policy-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biassed.Assimilation","Shifting.Baselines")
+params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biassed.Assimilation","Shifting.Baselines")
   
-  fct_relevel(sizes, "small", "medium", "large")
-
 d=ggplot(params_cluster,aes(x=variable,y=value,group=Cluster,fill=Cluster))+geom_bar(stat="identity",position="dodge")
 d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()+theme(axis.text.x = element_text(angle = 90))
 
@@ -308,7 +306,7 @@ d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluste
 emissionssplit=split(clems,clems$Cluster)
 source("src\\climate_component.R")
 
-cltemp=data.frame(Year=2015:2100)
+cltemp=data.frame(Year=2020:2100)
 
 for(i in 1:length(emissionssplit)){
  
