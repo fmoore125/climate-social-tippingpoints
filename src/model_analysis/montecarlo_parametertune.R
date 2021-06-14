@@ -54,10 +54,10 @@ for(i in 1:nsim){
 #get relative performace - standardize across all model runs
 operror=(operror-mean(operror))/sd(operror)
 polerror=(polerror-mean(polerror))/sd(polerror)
-toterror=(operror+polerror)/2 #weight by quality of data? or try different weighting
+toterror=(operror+polerror)/2 
 
 cor=apply(params,MARGIN=2,function(x) cor(x,toterror))
-covparamserror=data.frame(params=c("Homophily","Strong Force","Weak Force","Evidence","Pol-Opinion","Status-Quo Bias","Pol Int Feedback","Biassed Assimilation","Shifting Baselines"),cor=cor)
+covparamserror=data.frame(params=c("Homophily","Strong Force","Weak Force","Evidence","Pol-Opinion","Status-Quo Bias","Pol Int Feedback","Biased Assimilation","Shifting Baselines"),cor=cor)
 
 a=ggplot(covparamserror,aes(x=params,y=cor))+theme_bw()+geom_bar(stat="identity",fill="darkorchid")+labs(x="",y="Parameter-Error Correlation")+geom_hline(yintercept=0,lwd=2)
 x11()
@@ -296,7 +296,7 @@ params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "5","1","4","6","3","
 params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="5","Aggresive Action"="1","Technical Challenges"="4","Delayed Recognition"="6","Little and Late"="2","Victim of Success"="3")
 
 #order parameters to group by component
-params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biassed.Assimilation","Shifting.Baselines")
+params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biased.Assimilation","Shifting.Baselines")
   
 d=ggplot(params_cluster,aes(x=variable,y=value,group=Cluster,fill=Cluster))+geom_bar(stat="identity",position="dodge")
 d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()+theme(axis.text.x = element_text(angle = 90))

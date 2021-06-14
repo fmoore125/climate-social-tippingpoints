@@ -70,7 +70,7 @@ colnames(params)=c("endogenous_cost","frac_support","status_quo_bias","cumulativ
 params$status_quo_bias=as.factor(params$status_quo_bias);params$status_quo_bias=fct_recode(params$status_quo_bias,"Low Status-Quo Bias"="1.25","High Status Quo Bias"="9")
 
 a=ggplot(params,aes(x=endogenous_cost*100,y=frac_support/0.5,fill=cumulative_emissions,z=cumulative_emissions))+geom_tile()
-a=a+facet_wrap(~status_quo_bias)+labs(x="Endogenous Cost Reductions (% per Doubling)",y="Fraction Climate Policy Supporters",fill="Total Emissions\n2020-2100\n(GtC)")
+a=a+facet_wrap(~status_quo_bias)+labs(x="Endogenous Cost Reductions (% per Doubling)",y="Initial Fraction Climate Policy Supporters",fill="Total Emissions\n2020-2100\n(GtC)")
 a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
 a=a+scale_fill_gradient(low="yellow",high="turquoise3")
 a=a+geom_contour(breaks=seq(600,1400,by=50),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=2,rotate=FALSE)
@@ -117,7 +117,7 @@ colnames(params)=c("biassed_assimilation","evidenceeffect","shiftingbaseline","o
 params$shiftingbaseline=as.factor(params$shiftingbaseline);params$shiftingbaseline=fct_recode(params$shiftingbaseline,"Shifting Baseline"="1","Fixed Baseline"="0")
 
 a=ggplot(params,aes(x=biassed_assimilation,y=evidenceeffect,fill=opposers2050*100,z=opposers2050*100))+geom_tile()
-a=a+facet_wrap(~shiftingbaseline)+labs(x="Biassed Assmiliation",y="Effect of Perceived Weather on Opinion",fill="Policy Opposers\n2050 (%)")
+a=a+facet_wrap(~shiftingbaseline)+labs(x="Biased Assmiliation",y="Effect of Perceived Weather on Opinion",fill="Policy Opposers\n2050 (%)")
 a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
 a=a+scale_fill_gradient(low="darkorchid",high="palegreen2")
 #a=a+geom_contour(breaks=seq(2,8,by=0.5),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=1,rotate=FALSE)
