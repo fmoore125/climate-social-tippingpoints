@@ -11,7 +11,7 @@ library(DiagrammeR)
 
 ### Model Overview
 
-<p style="font-size:14pt">There are six primary components in the model, with linkages between components shown below. Opinions about climate policy (*Opinion Component*) determine both individual adoption of emissions-reducing behavior (*Adoption Component*) and collective action (*Policy Component*). Adoption and policy togther determine the level of greenhouse gas emissions (*Emissions Component*), which in turn affect the climate system (*Climate Component*).</p>
+<p style="font-size:14pt">There are six primary components in the model, with linkages between components shown below. Opinions about climate policy (*Opinion Component*) determine both individual adoption of emissions-reducing behavior (*Adoption Component*) and collective action (*Policy Component*). Adoption and policy togther determine the level of greenhouse gas emissions (*Emissions Component*), which in turn affect the climate system (*Climate Component*). Observation of climate change can feedback to affect opinions on climate policy (*Cognition Component*).</p>
 ```{r}
 DiagrammeR::grViz("digraph rmarkdown{
 graph [overlap = false, fontsize = 18, layout=circo]
