@@ -58,6 +58,7 @@ vignettes/*.pdf
 
 #output
 /writingup
+/big_data
 
 
 #Knitted Rmarkdown files

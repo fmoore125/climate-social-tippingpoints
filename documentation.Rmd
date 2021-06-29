@@ -1,7 +1,9 @@
 ---
 title: "Tipping Points in the Climate-Social System, Model Documentation"
-
-output: html_document
+always_allow_html: true
+output: pdf_document
+fontsize: 10pt
+geometry: "left=0.5in,right=0.5in,top=1in,bottom=1in"
 ---
 
 ```{r setup, include=FALSE}
@@ -60,13 +62,13 @@ $$\mathbf{Network_{t}} = \left[\begin{array}
 $$PolOp_{t}=\kappa \Delta Policy_{t-1}$$</p>
 <p style="font-size:14pt">Note that this effect is the same for all opinion groups and that the sign can be either positive or negative, depending on whether the policy change last period increased (positive) or decreased (negative) pro-climate policies.</p>
 
-<p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:
+<p style="font-size:14pt">The transition probability matrix, restricting transitions to neighboring opinion groups, is given by:</p>
 $$\mathbf{P_{t}}=\left[\begin{array}
-{rrr}
+{lll}
 (1-(\sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t}) & \sum_{j=2,3}SocialForce_{1,j}-\eta Ev_{1,t-1}-PolOp_{t} & 0 \\
 SocialForce_{2,1}+\eta Ev_{2,t-1}+PolOp_{t} & 1-(\sum_{j=1,3}SocialForce_{2,j}) & SocialForce_{2,1}-\eta Ev_{2,t-1}-PolOp \\
 0 &  \sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t} & (1-(\sum_{j=1,2}SocialForce_{3,j}+\eta Ev_{3,t-1}+PolOp_{t})
-\end{array}\right]$$</p>
+\end{array}\right]$$
 
 <p style="font-size:14pt">The new distribution of opinion in time t depends on the the previous distribution of opinion and transition probabilities:
 $$\mathbf{Op_{t}}=\mathbf{Op_{t-1}}*\mathbf{P_{t}}$$</p>
