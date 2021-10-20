@@ -59,17 +59,13 @@ toterror=(operror+polerror)/2
 cor=apply(params,MARGIN=2,function(x) cor(x,toterror))
 covparamserror=data.frame(params=c("Homophily","Strong Force","Weak Force","Evidence","Pol-Opinion","Status-Quo Bias","Pol Int Feedback","Biased Assimilation","Shifting Baselines"),cor=cor)
 
-a=ggplot(covparamserror,aes(x=params,y=cor))+theme_bw()+geom_bar(stat="identity",fill="darkorchid")+labs(x="",y="Parameter-Error Correlation")+geom_hline(yintercept=0,lwd=2)
-x11()
-a
-
 sampleweight=(-1*toterror)-min(-1*toterror) #convert to strictly positive metric increasing in model performance
 sampleweight=sampleweight/sum(sampleweight) #convert to "probability"
 
 #plot paremter densities before and after tuning
 densplots=list()
 
-x11()
+pdf(file="figureS1a.pdf")
 par(mfrow=c(3,3))
 
 for(i in 1:dim(params)[2]){
@@ -79,6 +75,7 @@ for(i in 1:dim(params)[2]){
   lines(x=postdens$x,y=postdens$y,col="#84c3a0",lwd=2)
   if(i==3) legend("topright",legend=c("Prior","Posterior"),lwd=2,col=c("#135678","#84c3a0"),bty="n",cex=1.5)
 }
+dev.off()
 
 #calculate covariance of parameters, weighting by error
 samp=sample(1:nsim,nsim,replace=TRUE,prob=sampleweight)
@@ -152,13 +149,13 @@ for(i in 1:dim(testgrid)[2]){
 testgrid=cbind(testgrid,sampleweight)
 colnames(testgrid)=c("m_max","r_max","sampleweight")
 
-fwrite(testgrid,file="data/MC Runs/parameter_tune_mitigation.csv")
+fwrite(testgrid,file="big_data/MC Runs/parameter_tune_mitigation.csv")
 
 #-------------Monte Carlo of full model, with mitigation, policy, and option parameters weighted by tuning-derived probability----------
 source("src/model.R")
 
-polopparams=fread("data/MC Runs/parameter_tune.csv")
-mitparams=fread("data/MC Runs/parameter_tune_mitigation.csv")
+polopparams=fread("big_data/MC Runs/parameter_tune.csv")
+mitparams=fread("big_data/MC Runs/parameter_tune_mitigation.csv")
 
 #initial opinion distribution - not varied, but fixed at particular values from Yale Climate Communications Project
 frac_opp_01=0.19 #doubtful and dismissive (global warming 6 americas)
@@ -168,7 +165,10 @@ mc=100000
 params=matrix(nrow=mc,ncol=21)
 pol=matrix(nrow=mc,ncol=81);ems=matrix(nrow=mc,ncol=81)
 
-for(i in 1:mc){
+set.seed(2090)
+i=0
+while(i<=mc){
+  skip_to_next=FALSE
   #draw mitigation, policy and opinion parameters, weighting by tuned probability
   polops=as.numeric(polopparams[sample(1:dim(polopparams)[1],size=1,prob=polopparams$sampleweight),1:9])
   homophily_param1=polops[1];forcestrong1=polops[2];forceweak1=polops[3];evidenceeffect1=polops[4];policyopinionfeedback_01=polops[5]
@@ -189,12 +189,16 @@ for(i in 1:mc){
   lbd_param01=runif(1,0,0.3)
   lag_param01=round(runif(1,0,30))
   
-  m=model()
+  m=tryCatch(model(), error = function(e) { skip_to_next <<- TRUE})
+  
+  if(skip_to_next) { next } 
+  
   #save output
   params[i,]=c(polops,mit,ced_param1,policy_pbcchange_max1,pbc_01,pbc_steep1,opchangeparam,etc_total1,normeffect1,adopt_effect1,lbd_param01,lag_param01)
   pol[i,]=m$policy;ems[i,]=m$totalemissions
   
   if(i%%1000==0) print(i)
+  i=i+1
 }
 colnames(params)=c(colnames(polopparams)[1:9],colnames(mitparams)[1:2],"ced","policy_pbc","pbc_init","pbc_steep","policy_adoption","etc_total","normeffect","adopt_effect","lbd_param","lag_param")
 fwrite(params,file="data/MC Runs/MC Runs_TunedParams/params.csv")

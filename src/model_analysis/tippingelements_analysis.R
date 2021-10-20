@@ -1,5 +1,6 @@
 library(ggplot2)
 library(forcats)
+library(metR)
 #graphs to demonstrate interaction of model tipping points
 
 
