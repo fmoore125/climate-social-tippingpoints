@@ -13,8 +13,8 @@ source("src/model_analysis/model_parametertune.R")
 nsim=20000
 
 params=matrix(nrow=nsim,ncol=9)
-optune=array(dim=c(11,3,nsim))
-poltune=matrix(nrow=nsim,ncol=11)
+optune=array(dim=c(8,3,nsim))
+poltune=matrix(nrow=nsim,ncol=8)
 
 for(i in 1:nsim){
   #draw homophily parameter
@@ -37,8 +37,8 @@ for(i in 1:nsim){
 }
 
 #compare output to observations
-op=read.csv("data/Data for Hindcasting/opinion/ypcc_sixamericas_final.csv")
-pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices.csv")
+op=read.csv("data/Data for Hindcasting/opinion/pew_final.csv")
+pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices_finalforpewcountries.csv")
 pol=pol[2:9,6]
 
 #calculate total error for each simulation

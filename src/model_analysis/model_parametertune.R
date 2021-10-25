@@ -6,28 +6,29 @@ source("src/emissions_component.R")
 source("src/cognition_component.R")
 load("data/naturalvariability.Rdat")
 
-#load historic emissions
+#load historic emissions - for 2013 to 2020
 emissions=read.csv("data/Data for Hindcasting/emissions/historicalemissions.csv")
-bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
-bau_outside1=emissions[,4]/1000*12/(12+16+16)
-ex_forcing1=emissions[,5]
+bau1=emissions[4:11,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau_outside1=emissions[4:11,4]/1000*12/(12+16+16)
+ex_forcing1=emissions[4:11,5]
 
 #load historic opinion data for initialization
-op=read.csv("data/Data for Hindcasting/opinion/ypcc_sixamericas_final.csv")
+op=read.csv("data/Data for Hindcasting/opinion/pew_final.csv")
+op[,2:4]=op[,2:4]/100
 frac_opp_01=op[1,4]
 frac_neut_01=op[1,3]
 
 #initialize initial policy level as well
-pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices.csv")
-policy_01=pol[3,6]
+pol=read.csv("data/Data for Hindcasting/policy/worldbank_carbonprices_finalforpewcountries.csv")
+policy_01=pol[1,3]
 
 #initialize carbon cycle and climate model at 2010 values
 source("src/utility_scripts/initialize climate model.R")
 source("src/climate_component.R")
-mass_0=init_mass[6,] #initial mass of carbon in atmosphere, upper ocean, lower ocean (GtC) in 2010, from initializing climate model in 2005
-temp_0=init_temperature[6,]
+mass_0=init_mass[9,] #initial mass of carbon in atmosphere, upper ocean, lower ocean (GtC) in 2013, from initializing climate model in 2005
+temp_0=init_temperature[9,]
 
-model_tune=function(time=1:11,
+model_tune=function(time=1:8,
                homophily_param=homophily_param1,
                frac_opp_0=frac_opp_01,
                frac_neut_0=frac_neut_01,
@@ -60,7 +61,7 @@ model_tune=function(time=1:11,
                evidenceeffect=evidenceeffect1,
                biassedassimilation=biassedassimilation1,
                shiftingbaselines=shiftingbaselines1,
-               year0=2010,
+               year0=2013,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
                lbd_param=lbd_param01,
