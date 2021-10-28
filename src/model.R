@@ -30,8 +30,8 @@ model=function(time=1:81,
                etc_total=etc_total1,
                etc_steep=etc_steep1,
                normeffect=normeffect1,
-               bau=bau1,
-               bau_outside_region=bau_outside1,
+               bau0=bau1,
+               bau_outside_region0=bau_outside1,
                ex_forcing=ex_forcing1,
                m_max=m_max1,
                r_max=r_max1,
@@ -44,7 +44,8 @@ model=function(time=1:81,
                natvar=NULL,
                policyopinionfeedback_param=policyopinionfeedback_01,
                lbd_param=lbd_param01,
-               lag_param=lag_param01
+               lag_param=lag_param01,
+               temp_emissionsparam=temp_emissionsparam01
                ){
   
   startdist=c(frac_opp_0,frac_neut_0,1-(frac_opp_0+frac_neut_0))
@@ -70,6 +71,12 @@ model=function(time=1:81,
   
   pbc=numeric(length=length(time))
   pbc[1]=pbc_0
+  
+  bau=numeric(length=length(time))
+  bau[1]=bau0[1]
+  
+  bau_outside_region=numeric(length=length(time))
+  bau_outside_region[1]=bau_outside_region0[1]
   
   emissions=numeric(length=length(time))
   emissions[1]=bau[1]
@@ -112,6 +119,10 @@ model=function(time=1:81,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
+    #change in bau emissions due to temperature feeback 
+    bau[t]=bauchange(bau0[t],temperature[t-1,1],temp_emissionsparam)
+    bau_outside_region[t]=bauchange(bau_outside_region0[t],temperature[t-1,1],temp_emissionsparam)
+    
     temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
@@ -133,8 +144,8 @@ model=function(time=1:81,
     evidence[t,]=temp5[[2]]
     
   }
-  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau+bau_outside_region,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions)
-  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau_total","mass","temp","bau_temp","evidence","anomaly","year","totalemissions")
+  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau+bau_outside_region,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions,bau_mass)
+  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau_total","mass","temp","bau_temp","evidence","anomaly","year","totalemissions","bau_mass")
   
   return(a)
 }
