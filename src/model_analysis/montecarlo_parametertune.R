@@ -239,7 +239,7 @@ x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
 #six clusters looks good
-nclus=5
+nclus=6
 set.seed(2090)
 test=kmeans(df_scaled,nclus)
 
