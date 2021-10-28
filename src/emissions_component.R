@@ -1,4 +1,8 @@
 #emissions depend on bau emissions, adoption of individual actions, and policy
+bauchange=function(bau0_t,temperature_t_1,temp_emissions){
+  bau_t=bau0_t*(1+temp_emissions)*temperature_t_1
+  return(bau_t)
+}
 
 emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag,bau_t_lag,bau_outisde_t,lag=lag_param){
   #contemporaneous reduction from policy, depends on policy
