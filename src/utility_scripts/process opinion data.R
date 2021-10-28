@@ -35,15 +35,15 @@ write.csv(ops_processed,file="data/Data for Hindcasting/opinion/pew_final.csv")
 co2=read.csv("C:/Users/fmoore/Documents/GitHub/co2emissions.csv")
 
 co2_processed=co2%>%
-  filter(Code%in%c("OWID_WRL","USA","CAN"))%>%
-  filter(Year%in%c(2013,2016:2018,2020))
+  filter(Code%in%c("OWID_WRL","USA","CAN","AUS"))%>%
+  filter(Year%in%c(2013:2020))
 
-global=co2_processed$Annual.CO2.emissions..zero.filled.[9:12]
+global=co2_processed$Annual.CO2.emissions..zero.filled.[22:28]
 
 co2_processed=co2_processed%>%
-  filter(Code%in%c("CAN","USA"))
+  filter(Code%in%c("CAN","USA","AUS"))
 
-co2_processed$global=c(global,global)
+co2_processed$global=c(global,global,global)
 co2_processed$fraction=co2_processed$Annual.CO2.emissions..zero.filled./co2_processed$global
 
 #merge in emissions data to carbon pricing data to get weighted average of carbon prices in opinion regions by year
