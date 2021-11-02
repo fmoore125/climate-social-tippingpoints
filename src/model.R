@@ -73,10 +73,10 @@ model=function(time=1:81,
   pbc[1]=pbc_0
   
   bau=numeric(length=length(time))
-  bau[1]=bau0[1]
+  bau[1]=bauchange(bau0[1],temp_0[1],temp_emissionsparam)
   
   bau_outside_region=numeric(length=length(time))
-  bau_outside_region[1]=bau_outside_region0[1]
+  bau_outside_region[1]=bauchange(bau_outside_region0[1],temp_0[1],temp_emissionsparam)
   
   emissions=numeric(length=length(time))
   emissions[1]=bau[1]

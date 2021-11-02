@@ -1,6 +1,6 @@
 #emissions depend on bau emissions, adoption of individual actions, and policy
 bauchange=function(bau0_t,temperature_t_1,temp_emissions){
-  bau_t=bau0_t*(1+temp_emissions)*temperature_t_1
+  bau_t=bau0_t*(1+(temp_emissions*temperature_t_1))
   return(bau_t)
 }
 

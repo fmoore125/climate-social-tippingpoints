@@ -5,6 +5,7 @@ library(tidyverse)
 library(reshape2)
 library(patchwork)
 library(forcats)
+library(EnvStats)
 
 source("src/model_analysis/model_parametertune.R")
 
@@ -18,24 +19,16 @@ poltune=matrix(nrow=nsim,ncol=8)
 
 for(i in 1:nsim){
   #draw homophily parameter
-  homophily_param_tune=max(1-rbeta(1,2,12),0.33333334)
-  forcestrong_tune=rbeta(1,2,5)
+  homophily_param_tune=max(1-rbeta(1,3,10),0.33333334)
+  forcestrong_tune=runif(1,0,1)
   forceweak_tune=runif(1,0,forcestrong_tune)
-  evidenceeffect_tune=runif(1,0,0.5)
-  policyopinionfeedback_param_tune=rbeta(1,4,8)*0.01
+  evidenceeffect_tune=runif(1,0,0.3)
+  policyopinionfeedback_param_tune=runif(1,0,0.005)
   pol_response_tune=runif(1,1,30)
   pol_feedback_tune=runif(1,pol_response_tune*-1,pol_response_tune)
   biassedassimilation_tune=runif(1,0,1)
   shiftingbaselines_tune=ifelse(runif(1,0,1)>0.75,0,1)
-  # homophily_param_tune=runif(1,min=0.333333334,max=1)
-  # forcestrong_tune=runif(1,0,1)
-  # forceweak_tune=runif(1,0,forcestrong_tune)
-  # evidenceeffect_tune=runif(1,0,1)
-  # policyopinionfeedback_param_tune=runif(1,0,0.2)
-  # pol_response_tune=runif(1,1,30)
-  # pol_feedback_tune=runif(1,pol_response_tune*-1,pol_response_tune)
-  # biassedassimilation_tune=runif(1,0,1)
-  # shiftingbaselines_tune=round(runif(1,0,1))
+  
   
   params[i,]=c(homophily_param_tune,forcestrong_tune,forceweak_tune,evidenceeffect_tune,policyopinionfeedback_param_tune,pol_response_tune,pol_feedback_tune,biassedassimilation_tune,shiftingbaselines_tune)
   m=model_tune(homophily_param = homophily_param_tune,forcestrong = forcestrong_tune,forceweak = forceweak_tune,evidenceeffect = evidenceeffect_tune,policyopinionfeedback_param = policyopinionfeedback_param_tune,pol_response = pol_response_tune,pol_feedback = pol_feedback_tune,biassedassimilation = biassedassimilation_tune,shiftingbaselines=shiftingbaselines_tune)
@@ -168,11 +161,11 @@ polopparams=fread("big_data/MC Runs/parameter_tune.csv")
 mitparams=fread("big_data/MC Runs/parameter_tune_mitigation.csv")
 
 #initial opinion distribution - not varied, but fixed at particular values from Pew Opinion Data
-frac_opp_01=0.07 #doubtful and dismissive (global warming 6 americas)
-frac_neut_01=0.22 #cautious and disengaged (global warming 6 americas)
+frac_opp_01=0.07 
+frac_neut_01=0.22 
 
 mc=100000
-params=matrix(nrow=mc,ncol=21)
+params=matrix(nrow=mc,ncol=22)
 pol=matrix(nrow=mc,ncol=81);ems=matrix(nrow=mc,ncol=81)
 
 set.seed(2090)
@@ -199,18 +192,21 @@ while(i<=mc){
   lbd_param01=runif(1,0,0.3)
   lag_param01=round(runif(1,0,30))
   
+  #also add feedback from temperature to bau emissions
+  temp_emissionsparam01=rtri(1,min=-0.102,max=0.001,mode=-0.031) #distribution based on Woodard et al., 2019 PNAS estimates
+  
   m=tryCatch(model(), error = function(e) { skip_to_next <<- TRUE})
   
   if(skip_to_next) { next } 
   
   #save output
-  params[i,]=c(polops,mit,ced_param1,policy_pbcchange_max1,pbc_01,pbc_steep1,opchangeparam,etc_total1,normeffect1,adopt_effect1,lbd_param01,lag_param01)
+  params[i,]=c(polops,mit,ced_param1,policy_pbcchange_max1,pbc_01,pbc_steep1,opchangeparam,etc_total1,normeffect1,adopt_effect1,lbd_param01,lag_param01,temp_emissionsparam01)
   pol[i,]=m$policy;ems[i,]=m$totalemissions
   
   if(i%%1000==0) print(i)
   i=i+1
 }
-colnames(params)=c(colnames(polopparams)[1:9],colnames(mitparams)[1:2],"ced","policy_pbc","pbc_init","pbc_steep","policy_adoption","etc_total","normeffect","adopt_effect","lbd_param","lag_param")
+colnames(params)=c(colnames(polopparams)[1:9],colnames(mitparams)[1:2],"ced","policy_pbc","pbc_init","pbc_steep","policy_adoption","etc_total","normeffect","adopt_effect","lbd_param","lag_param","temp_emissions")
 fwrite(params,file="big_data/MC Runs/MC Runs_TunedParams/params.csv")
 fwrite(pol,file="big_data/MC Runs/MC Runs_TunedParams/policy.csv")
 fwrite(ems,file="big_data/MC Runs/MC Runs_TunedParams/emissions.csv")
@@ -239,7 +235,7 @@ x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
 #six clusters looks good
-nclus=6
+nclus=5
 set.seed(2090)
 test=kmeans(df_scaled,nclus)
 
@@ -263,8 +259,8 @@ clems$Year=as.numeric(as.character(clems$Year))
 clems=merge(clems,nruns)
 
 #add names of scenarios and order from most to least common
-clems$Cluster=fct_relevel(clems$Cluster, "3","5","2","1","4")
-clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="3","Aggresive Action"="5","Technical Challenges"="2","Little and Late"="4","Victim of Success"="1")
+clems$Cluster=fct_relevel(clems$Cluster, "2","3","1","5","4")
+clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
 
 cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#c42449")
 a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()+theme(text=element_text(size=16))
@@ -282,8 +278,8 @@ clpol$Cluster=as.factor(clpol$Cluster)
 clpol=merge(clpol,nruns)
 clpol$Year=as.numeric(as.character(clpol$Year))
 
-clpol$Cluster=fct_relevel(clpol$Cluster, "3","5","2","1","4")
-clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="3","Aggresive Action"="5","Technical Challenges"="2","Little and Late"="4","Victim of Success"="1")
+clpol$Cluster=fct_relevel(clpol$Cluster, "2","3","1","5","4")
+clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
 
 b=ggplot(clpol,aes(x=Year,y=Policy,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
 b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs",y="Climate Policy Stringency")+ theme(legend.position="none",text=element_text(size=16))
@@ -298,18 +294,18 @@ params_cluster=params_cluster%>%
   group_by(cluster)%>%
   summarize_all(mean)
 
-colnames(params_cluster)=c("Cluster",colnames(params_cluster)[2:10],"Max Mit. Rate","Max Mit Time","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time")
+colnames(params_cluster)=c("Cluster",colnames(params_cluster)[2:10],"Max Mit. Rate","Max Mit Time","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time","Temp-Emissions")
 #drop weak force as it doesn't add anything interesting over just the strong force
 params_cluster=params_cluster[,-which(colnames(params_cluster)=="Weak.Force")]
 
 params_cluster=melt(params_cluster,id.var="Cluster")
 params_cluster$Cluster=as.factor(params_cluster$Cluster)
 
-params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "3","5","2","1","4")
-params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="3","Aggresive Action"="5","Technical Challenges"="2","Little and Late"="4","Victim of Success"="1")
+params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "2","3","1","5","4")
+params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
 
 #order parameters to group by component
-params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Adoption Effect","Biased.Assimilation","Shifting.Baselines")
+params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Temp-Emissions","Adoption Effect","Biased.Assimilation","Shifting.Baselines")
   
 d=ggplot(params_cluster,aes(x=variable,y=value,group=Cluster,fill=Cluster))+geom_bar(stat="identity",position="dodge")
 d=d+scale_fill_manual(values=cols)+labs(x="",y="Cluster Mean Value",fill="Cluster")+theme_bw()+theme(axis.text.x = element_text(angle = 90))
@@ -341,5 +337,7 @@ for(i in 1:length(emissionssplit)){
   } 
   cltemp=cbind(cltemp,temperature[,1])
 }
+
+#random forest modeling
   
 
