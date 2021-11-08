@@ -30,8 +30,8 @@ model=function(time=1:81,
                etc_total=etc_total1,
                etc_steep=etc_steep1,
                normeffect=normeffect1,
-               bau0=bau1,
-               bau_outside_region0=bau_outside1,
+               bau=bau1,
+               bau_outside_region=bau_outside1,
                ex_forcing=ex_forcing1,
                m_max=m_max1,
                r_max=r_max1,
@@ -72,17 +72,11 @@ model=function(time=1:81,
   pbc=numeric(length=length(time))
   pbc[1]=pbc_0
   
-  bau=numeric(length=length(time))
-  bau[1]=bauchange(bau0[1],temp_0[1],temp_emissionsparam)
-  
-  bau_outside_region=numeric(length=length(time))
-  bau_outside_region[1]=bauchange(bau_outside_region0[1],temp_0[1],temp_emissionsparam)
-  
   emissions=numeric(length=length(time))
-  emissions[1]=bau[1]
+  emissions[1]=bau[1]*(1+(temp_emissionsparam*temp_0[1]))
   
   totalemissions=numeric(length=length(time))
-  totalemissions[1]=bau[1]+bau_outside_region[1]
+  totalemissions[1]=(bau[1]+bau_outside_region[1])*(1+(temp_emissionsparam*temp_0[1]))
   
   mitigation=matrix(0,nrow=length(time),ncol=length(time)) #must be all zeroes to start
   
@@ -119,11 +113,7 @@ model=function(time=1:81,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
-    #change in bau emissions due to temperature feeback 
-    bau[t]=bauchange(bau0[t],temperature[t-1,1],temp_emissionsparam)
-    bau_outside_region[t]=bauchange(bau_outside_region0[t],temperature[t-1,1],temp_emissionsparam)
-    
-    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param)
+    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,temperature[t-1,1],effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param,temp_emissions=temp_emissionsparam)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
     totalemissions[t]=temp2[[3]]
@@ -144,8 +134,8 @@ model=function(time=1:81,
     evidence[t,]=temp5[[2]]
     
   }
-  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau+bau_outside_region,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions,bau_mass)
-  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau_total","mass","temp","bau_temp","evidence","anomaly","year","totalemissions","bau_mass")
+  a=list(time,distributions,policy,pbc,nadopters,adoptersfrac,emissions,mitigation,bau+bau_outside_region,mass,temperature,bau_temp,evidence,anomaly,year0:(year0+length(time)-1),totalemissions)
+  names(a)=c("time","distributions","policy","pbc","nadopters","adoptersfrac","emissions","mitigation","bau_total","mass","temp","bau_temp","evidence","anomaly","year","totalemissions")
   
   return(a)
 }

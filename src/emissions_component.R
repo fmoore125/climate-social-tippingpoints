@@ -1,10 +1,5 @@
-#emissions depend on bau emissions, adoption of individual actions, and policy
-bauchange=function(bau0_t,temperature_t_1,temp_emissions){
-  bau_t=bau0_t*(1+(temp_emissions*temperature_t_1))
-  return(bau_t)
-}
 
-emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag,bau_t_lag,bau_outisde_t,lag=lag_param){
+emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,temperature_t_1,effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag,bau_t_lag,bau_outisde_t,lag=lag_param,temp_emissions=temp_emissionsparam){
   #contemporaneous reduction from policy, depends on policy
   #mitigation_t_1 is a matrix with dimensions of max(t) *t-1 that gives persistent effect of mitigation actions in previous time periods
   #lbd param is a "learning by doing" parameter giving the fraction reduction in cost for a doubling of installed mitigation stock
@@ -32,7 +27,10 @@ emissionschange=function(bau_t,nadopters_t,policy_t,mitigation,t,effectiveness=a
   #outside region follows OECD mitigation pathway, with a lag - if lag is zero, effectively single region - same % reduction in outside region as inside
   total_emissions_t=ifelse(lag==0,emissions_t+bau_outisde_t*(1-(bau_t-emissions_t)/bau_t),emissions_t+bau_outisde_t*(1-(bau_t_lag-emissions_t_lag)/bau_t_lag))
   
-
+  #account for temperature feedback
+  total_emissions_t=total_emissions_t*(1+(temp_emissions*temperature_t_1))
+  emissions_t=emissions_t*(1+(temp_emissions*temperature_t_1))
+  
   return(list(emissions_t,mitigation,total_emissions_t))
 }
 

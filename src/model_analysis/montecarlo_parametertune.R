@@ -6,6 +6,9 @@ library(reshape2)
 library(patchwork)
 library(forcats)
 library(EnvStats)
+library(randomForest)
+library(randomForestExplainer)
+
 
 source("src/model_analysis/model_parametertune.R")
 
@@ -234,7 +237,7 @@ for(i in 1:length(nclustertest)){
 x11()
 plot(x=nclustertest,y=wss,type="b",xlab="Number of Clusters",ylab="Within Sum of Squares")
 
-#six clusters looks good
+#five clusters looks good
 nclus=5
 set.seed(2090)
 test=kmeans(df_scaled,nclus)
@@ -338,6 +341,39 @@ for(i in 1:length(emissionssplit)){
   cltemp=cbind(cltemp,temperature[,1])
 }
 
-#random forest modeling
-  
+#-------------Random Forest Modeling of Model Output ---------------------
 
+years=2020:2100
+
+ems=fread("big_data/MC Runs/MC Runs_TunedParams/emissions.csv")
+params=fread("big_data/MC Runs/MC Runs_TunedParams/params.csv")
+pol=fread("big_data/MC Runs/MC Runs_TunedParams/policy.csv")
+colnames(params)=c(colnames(params)[1:9],"Max Mit. Rate","Max Mit Time","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Adoption Effect","LBD Effect","Lag Time","Temp-Emissions")
+
+y_ems=rowSums(ems) #dependent variable is cumulative emissions over the 21st century
+y_pol=as.matrix(pol)[,which(years==2030)]
+
+sampsize=10000
+samp=sample(1:length(y_ems),sampsize,replace=FALSE)
+
+rf_ems=randomForest(x=params[samp,],y=y_ems[samp],importance=TRUE, tree=TRUE,nodesize=100,mtry=5,ntree=300)
+rf_pol=randomForest(x=params[samp,],y=y_pol[samp],importance=TRUE,tree=TRUE,nodesize=100,mtry=5,ntree=300)
+
+min_depth_ems=min_depth_distribution(rf_ems)
+min_depth_pol=min_depth_distribution(rf_pol)
+
+a=plot_min_depth_distribution(min_depth_ems, mean_sample = "all_trees", k = 10)
+a=a+labs(x="",title="Cumulative Emissions 2020-2100")
+b=plot_min_depth_distribution(min_depth_pol, mean_sample = "all_trees", k = 10)
+b=b+labs(x="",title="2030 Policy")
+
+x11()
+b+a+plot_layout(ncol=2)
+
+#random forest interactions
+imp_ems=important_variables(rf_ems, k = 8, measures = c("mean_min_depth", "no_of_nodes"))
+imp_pol=important_variables(rf_pol, k=8, measures=c("mean_min_depth","no_of_nodes"))
+int_ems=min_depth_interactions(rf_ems,imp_ems)
+int_pol=min_depth_interactions(rf_pol,imp_pol)
+
+plot(int_ems)
