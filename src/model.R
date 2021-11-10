@@ -113,7 +113,7 @@ model=function(time=1:81,
     nadopters[t]=temp[[2]]
     adoptersfrac[t,]=temp[[3]]
     
-    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,temperature[t-1,1],effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param,temp_emissions=temp_emissionsparam)
+    temp2=emissionschange(bau[t],nadopters[t],policy[t],mitigation,t,temperature[t-1,1],temperature_t_lag=ifelse(t<=lag_param,temperature[t-1,1],temperature[t-lag_param,1]),effectiveness=adopt_effect,maxm=m_max,rmax=r_max,r0=r_0,lbd=lbd_param,emissions_t_lag=ifelse(t<=lag_param|lag_param==0,emissions[1],emissions[t-lag_param]),bau_t_lag=ifelse(t<=lag_param|lag_param==0,bau[1],bau[t-lag_param]),bau_outisde_t=bau_outside_region[t],lag=lag_param,temp_emissions=temp_emissionsparam)
     emissions[t]=temp2[[1]]
     mitigation=temp2[[2]]
     totalemissions[t]=temp2[[3]]

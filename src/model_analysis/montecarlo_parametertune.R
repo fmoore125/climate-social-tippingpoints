@@ -227,7 +227,7 @@ nacols=which(apply(df_scaled,MARGIN=2,function(x) sum(is.na(x)))==mc)
 df_scaled=df_scaled[,-nacols]
 
 #visualize ideal number of clusters
-nclustertest=2:10
+nclustertest=2:9
 wss=numeric(length=length(nclustertest))
 set.seed(2090)
 for(i in 1:length(nclustertest)){
