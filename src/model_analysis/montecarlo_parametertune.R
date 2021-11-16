@@ -169,7 +169,7 @@ frac_neut_01=0.22
 
 mc=100000
 params=matrix(nrow=mc,ncol=22)
-pol=matrix(nrow=mc,ncol=81);ems=matrix(nrow=mc,ncol=81)
+pol=matrix(nrow=mc,ncol=81);ems=matrix(nrow=mc,ncol=81);climtemp=matrix(nrow=mc,ncol=81)
 
 set.seed(2090)
 i=0
@@ -205,6 +205,7 @@ while(i<=mc){
   #save output
   params[i,]=c(polops,mit,ced_param1,policy_pbcchange_max1,pbc_01,pbc_steep1,opchangeparam,etc_total1,normeffect1,adopt_effect1,lbd_param01,lag_param01,temp_emissionsparam01)
   pol[i,]=m$policy;ems[i,]=m$totalemissions
+  climtemp[i,]=m$temp[,1]
   
   if(i%%1000==0) print(i)
   i=i+1
@@ -213,6 +214,7 @@ colnames(params)=c(colnames(polopparams)[1:9],colnames(mitparams)[1:2],"ced","po
 fwrite(params,file="big_data/MC Runs/MC Runs_TunedParams/params.csv")
 fwrite(pol,file="big_data/MC Runs/MC Runs_TunedParams/policy.csv")
 fwrite(ems,file="big_data/MC Runs/MC Runs_TunedParams/emissions.csv")
+fwrite(climtemp,file="big_data/MC Runs/MC Runs_TunedParams/temperature.csv")
 
 ####------kmeans clustering of tuned output---------
 params=fread("big_data/MC Runs/MC Runs_TunedParams/params.csv")
@@ -341,6 +343,14 @@ for(i in 1:length(emissionssplit)){
   cltemp=cbind(cltemp,temperature[,1])
 }
 
+#adjust temperature baseline to 1850-1900 average using global temperature time series
+tempdat=read.csv("data/giss_globaltemp_19501980anomaly.csv")
+#adjustment from 1900 DICE climate model baseline
+adj=mean(tempdat$No_Smoothing[which(tempdat$Year%in%1880:1910)])-mean(tempdat$No_Smoothing[which(tempdat$Year%in%1895:1905)])
+
+#get 2091-2100 mean temperature change relative to 1880-1910 perioe
+colMeans(cltemp[which(cltemp$Year%in%2091:2100),2:6])-adj
+
 #-------------Random Forest Modeling of Model Output ---------------------
 
 years=2020:2100
@@ -376,4 +386,4 @@ imp_pol=important_variables(rf_pol, k=8, measures=c("mean_min_depth","no_of_node
 int_ems=min_depth_interactions(rf_ems,imp_ems)
 int_pol=min_depth_interactions(rf_pol,imp_pol)
 
-plot(int_ems)
+save(rf_ems,rf_pol,imp_ems,imp_pol,int_ems,int_pol,file="big_data/MC Runs/randomforests.Rdat")
