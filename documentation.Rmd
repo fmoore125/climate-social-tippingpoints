@@ -1,7 +1,7 @@
 ---
 title: "Climate-Social System Model Documentation"
 always_allow_html: true
-output: pdf_document
+output: html_document
 fontsize: 12pt
 geometry: "left=0.7in,right=0.7in,top=1in,bottom=1in"
 ---
@@ -22,7 +22,7 @@ node [shape = oval,
   Opinion; Adoption; Policy; Emissions; Climate; Cognition
 
 Opinion->{Adoption Policy} Policy->{Adoption Opinion}
-Adoption->{Emissions Opinion} Policy->Emissions Emissions->Climate
+Adoption->{Emissions Opinion} Policy->Emissions Emissions->Climate Climate->Emissions
 Climate->Cognition Cognition->Opinion
 
 }
@@ -229,6 +229,10 @@ $$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$</p
 <p style="font-size:14pt">By default, the  dynamics represented in the Opinion, Adoption, Policy, and Emissions components are based on studies from relatively wealthy countries. Accordingly, mitigation rates are applied to the subset of emissions from OECD countries. To simulate global temperatures and therefore the feedback from the climate system to opinion (Congition Component), mitigation rates in the rest of the world also need to be modeled. We model this simply as the lagged mitigation rates in the OCED, parameterized with the lag parameter, $L$, giving the number of years lag:
 $$E_{Tot,t}=E_{t}+BAU_{O,t}*(1-\frac{(BAU_{t-L}-E_{t-L})}{BAU_{t-L}})$$
 Where $BAU_{O,t}$ is business as usual emissions in the outside region. The model can be collapsed to a single-region model by setting $L=0$</p>
+
+<p style="font-size:14pt">Finally, there is a feedback allowed from global temperature to emissions. This reflects the fact that climate change itself may affect the expected level of emissions through impacts on economic productivity, the energy intensity of production, or the carbon intensity of energy. Following Woodard et al. (2019) this is parameterized as a % reduction in emissions that increases linearly in temperature:
+$$E_{Tot,t}=(1+(tef*T_{t-1})E_{Tot,t}$$</p>
+<p style="font-size:14pt">Where $tef$ is the temperature emissions feedback that has a central value of -0.031 based on Woodard et al. (2019).</p>
 
 ##Climate Component
 
