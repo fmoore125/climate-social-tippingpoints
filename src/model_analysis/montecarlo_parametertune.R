@@ -322,6 +322,11 @@ source("src\\climate_component.R")
 
 cltemp=data.frame(Year=2020:2100)
 
+emissions=read.csv("data/emissions_ssp3_rcp7.csv")
+bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
+bau_outside1=emissions[,4]/1000*12/(12+16+16)
+ex_forcing1=emissions[,5]
+
 for(i in 1:length(emissionssplit)){
  
   emissions_dat=emissionssplit[[i]]$Emissions[order(emissionssplit[[i]]$Year)]
@@ -334,9 +339,7 @@ for(i in 1:length(emissionssplit)){
   mass[1,]=mass_0
   
   for(t in 2:length(emissions_dat)){
-    temp3=temperaturechange(temperature[t-1,],mass[t-1,],emissions_dat[t],ex_forcing1[t],psi1_param=psi1,nu_param=nu)
-    mass[t,]=temp3[[1]]
-    temperature[t,]=temp3[[2]]
+    temp3=temperaturechange(temperature[t-1,],mass[t-1,],emissions_dat[t],ex_forcing1[t],bau1[t]+bau_outside1[t],psi1_param=psi1,nu_param=nu)
     mass[t,]=temp3[[1]]
     temperature[t,]=temp3[[2]]
   } 

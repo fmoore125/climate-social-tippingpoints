@@ -23,10 +23,17 @@ forcing=function(m_at_t,ex_forcing_t,m_at_0=596.4,nu_param=nu){
 #parameters from DICE2016 annualized using formula in Cai, Judd and Lontzek
 phi_temp=matrix(c(1-(0.01+0.047),0.01,0.0048,(1-0.0048)),byrow=TRUE,nrow=2)
 
-temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,psi1_param=psi1,nu_param=nu,mass_0_param=mass_0,
+temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,bau_tot_t,psi1_param=psi1,nu_param=nu,mass_0_param=mass_0,
                            phi_carbon_param=phi_carbon,phi_temp_param=phi_temp){
+  
+  #scale exogenous forcing based on % emissions reduction - assume max 50% effectivness for non-co2 gases
+  red=(bau_tot_t-emissions_t)/(bau_tot_t)
+  red=red*0.46
+  
+  ex_forcing_new=ex_forcing_t*(1-red)
+  
   mass_t=phi_carbon_param%*%mass_t_1+c(emissions_t,0,0)
-  forcing_t=forcing(mass_t[1],ex_forcing_t,m_at_0=596.4,nu_param=nu)
+  forcing_t=forcing(mass_t[1],ex_forcing_new,m_at_0=596.4,nu_param=nu)
   temp_t=phi_temp%*%temp_t_1+c(psi1_param*forcing_t,0)
   return(list(mass_t,temp_t))
 }

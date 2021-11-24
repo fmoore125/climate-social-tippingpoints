@@ -119,12 +119,11 @@ model=function(time=1:81,
     totalemissions[t]=temp2[[3]]
     
     #climate model
-    
-    temp3=temperaturechange(temperature[t-1,],mass[t-1,],totalemissions[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+    temp3=temperaturechange(temperature[t-1,],mass[t-1,],totalemissions[t],ex_forcing[t],bau[t]+bau_outside_region[t],psi1_param=psi1,nu_param=nu)
     mass[t,]=temp3[[1]]
     temperature[t,]=temp3[[2]]
     
-    temp4=temperaturechange(bau_temp[t-1,],bau_mass[t-1,],bau[t]+bau_outside_region[t],ex_forcing[t],psi1_param=psi1,nu_param=nu)
+    temp4=temperaturechange(bau_temp[t-1,],bau_mass[t-1,],bau[t]+bau_outside_region[t],ex_forcing[t],bau[t]+bau_outside_region[t],psi1_param=psi1,nu_param=nu)
     bau_mass[t,]=temp4[[1]]
     bau_temp[t,]=temp4[[2]]
     weather[t]=temperature[t,1]+naturalvariability[t]
