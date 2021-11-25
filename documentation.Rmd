@@ -238,7 +238,9 @@ $$E_{Tot,t}=(1+(tef*T_{t-1})E_{Tot,t}$$</p>
 
 <p style="font-size:14pt">The climate model is based on the DICE model, annualized using formulas from Cai and Lontzek (2019). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: [Cai, Y. and Lontzek, T. S., 2019. "The Social Cost of Carbon with Economic and Climate Risks", Journal of Political Economy, 127 (6), pp.2684-2736](https://www.journals.uchicago.edu/doi/full/10.1086/701890?mobileUi=0#)</p>
 
-<p style="font-size:14pt">The Cai and Lontzek model is initialized in 2005. For the default model run, we re-initialize using carbon mass and radiative balances in 2020 by running the model using global emissions observed 2005-2020. </p>
+<p style="font-size:14pt">The Cai and Lontzek model is initialized in 2005. For the default model run, we re-initialize using carbon mass and radiative balances in 2020 by running the model using global emissions observed 2005-2020. Following the DICE 2016 model,forcing from non-$CO_{2}$ greenhouse gases is parameterized as a single "exogenous forcing" term that is added to forcing from $CO_{2}$. This forcing is scaled using the relationship:
+$$ExF_{t}=ExF_{BAU,t}*(1-0.49*f_{CO2,t})$$
+where $ExF_{t}$ is the exogenous forcing term in time t, $ExF_{BAU,t}$ is the business as usual exogenous forcing term, and $f_{CO2,t}$ is the fractional reduction in $CO_{2}$ emissions below the RCP7 baseline in year t defined as $f_{CO2}= \frac{(BAU_{t}-E_{Tot,t})}{BAU_{t}}$. The $0.49$ scaling term comes from the relationship between reductions in $CO_{2}$ emissions and reductions in $CH_{4}$ and $N_{2}O$ emissions below RCP7 values observed across other RCP-SSP scenarios.</p>
 
 ## Cognition Component
 

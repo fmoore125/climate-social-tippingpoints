@@ -28,7 +28,7 @@ temperaturechange=function(temp_t_1,mass_t_1,emissions_t,ex_forcing_t,bau_tot_t,
   
   #scale exogenous forcing based on % emissions reduction - assume max 50% effectivness for non-co2 gases
   red=(bau_tot_t-emissions_t)/(bau_tot_t)
-  red=red*0.46
+  red=red*0.49
   
   ex_forcing_new=ex_forcing_t*(1-red)
   

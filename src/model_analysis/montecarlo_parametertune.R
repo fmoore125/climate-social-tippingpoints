@@ -354,6 +354,11 @@ adj=mean(tempdat$No_Smoothing[which(tempdat$Year%in%1880:1910)])-mean(tempdat$No
 #get 2091-2100 mean temperature change relative to 1880-1910 perioe
 colMeans(cltemp[which(cltemp$Year%in%2091:2100),2:6])-adj
 
+#### Probability distribution of temperature changes
+cltemp=as.matrix(fread(file="big_data/MC Runs/MC Runs_TunedParams/temperature.csv"))
+
+temps=rowMeans(cltemp[,which(2020:2100%in%2091:2100)])-adj
+
 #-------------Random Forest Modeling of Model Output ---------------------
 
 years=2020:2100
