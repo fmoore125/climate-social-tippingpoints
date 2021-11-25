@@ -22,6 +22,10 @@ Leiserowitz, A., Marlon, J., Wang, X., Bergquist, P., Goldberg, M., Kotcher, J.,
 ypcc_policysupport - https://climatecommunication.yale.edu/visualizations-data/americans-climate-views/
 Fraction supporting "Regulate CO2 as a pollutant"
 
+Pew Data on whether climate change is a threat: https://www.pewresearch.org/wp-content/uploads/2020/10/Climate-blog-topline-for-release-CHECKED.pdf.
+Limited to just countries with data 2013,2016,2017,2018 and 2020: USA, Canada, UK, Germany, Japan, Australia, Italy, France, Spain
+Article: https://www.pewresearch.org/fact-tank/2019/04/18/a-look-at-how-people-around-the-world-view-climate-change/
+
 Emissions:
 From IIASA SSP Database: https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=50
 Historical emissions (2010 - 2015) are van Marle et al (2017) and Hoesly et al (2018)

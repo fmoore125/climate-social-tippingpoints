@@ -94,7 +94,7 @@ params=expand.grid(biassedass_sweep,perception_sweep,baselines)
 dist_output_pro=numeric()
 dist_output_con=numeric()
 year=2050
-reps=750
+reps=1500
 for(i in 1:dim(params)[1]){
   print(i)
   temp1=numeric(length=reps);temp2=numeric(length=reps)

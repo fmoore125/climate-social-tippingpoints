@@ -1,7 +1,7 @@
 ---
 title: "Climate-Social System Model Documentation"
 always_allow_html: true
-output: pdf_document
+output: html_document
 fontsize: 12pt
 geometry: "left=0.7in,right=0.7in,top=1in,bottom=1in"
 ---
@@ -22,7 +22,7 @@ node [shape = oval,
   Opinion; Adoption; Policy; Emissions; Climate; Cognition
 
 Opinion->{Adoption Policy} Policy->{Adoption Opinion}
-Adoption->{Emissions Opinion} Policy->Emissions Emissions->Climate
+Adoption->{Emissions Opinion} Policy->Emissions Emissions->Climate Climate->Emissions
 Climate->Cognition Cognition->Opinion
 
 }
@@ -33,7 +33,7 @@ Climate->Cognition Cognition->Opinion
 
 <p style="font-size:14pt">Population is divided into three types based on opinion ($Op$) regarding climate policy - Supporting, Neutral, and Opposed (i.e. $\mathbf{Op} = \left[S,N,O\right]$). Movement between adjacent types is determined by up to three things: a social pressure or persuasive force based on interactions between groups given the group network structure ($Force$), evidence derived from one's own experience of weather ($Ev$), and a feedback from policy to opinion driven by individuals updating their information about the social norm based on institutional (i.e. policy) change ($PolOp$).</p>
 
-<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated (the "weak persuasive force", $F_{N}$), and the persuasive force of opinionated on neutral (the "strong persuasive force", $F_{S,O}$). There is also a "credibility-enhanding display" feedback from allowed from the Adoption Component. This allows the persuasive effect of climate policy supporters to be larger depending on the level of adoption of individual sustainable behaviors among supporters ($A_{t-1,S}$), compared to other opinion groups. The size of the effect is controlled by the CED parameter ($\xi$). Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
+<p style="font-size:14pt">Persuasive forces are governed by two parameters, the persuasive force of neutral on opinionated (the "weak persuasive force", $F_{N}$), and the persuasive force of opinionated on neutral (the "strong persuasive force", $F_{S,O}$). There is also a "credibility-enhancing display" feedback allowed from the Adoption Component. This allows the persuasive effect of climate policy supporters to be larger depending on the level of adoption of individual sustainable behaviors among supporters ($A_{t-1,S}$), compared to other opinion groups. The size of the effect is controlled by the CED parameter ($\xi$). Therefore, the force matrix describing the persuasive effect felt by each group (rows) from each other group (colums), conditional on encounter is given by:
 $$\mathbf{Force_{t}} = \left[\begin{array}
 {rrr}
 0 & F_{N} & F_{S,O} \\
@@ -230,11 +230,17 @@ $$E_{t}=BAU_{t}(1-M_{pol,t})(1-M_{ind,t})=BAU_{t}(1-M_{pol,t})(1-\pi N_{t})$$</p
 $$E_{Tot,t}=E_{t}+BAU_{O,t}*(1-\frac{(BAU_{t-L}-E_{t-L})}{BAU_{t-L}})$$
 Where $BAU_{O,t}$ is business as usual emissions in the outside region. The model can be collapsed to a single-region model by setting $L=0$</p>
 
+<p style="font-size:14pt">Finally, there is a feedback allowed from global temperature to emissions. This reflects the fact that climate change itself may affect the expected level of emissions through impacts on economic productivity, the energy intensity of production, or the carbon intensity of energy. Following Woodard et al. (2019) this is parameterized as a % reduction in emissions that increases linearly in temperature:
+$$E_{Tot,t}=(1+(tef*T_{t-1})E_{Tot,t}$$</p>
+<p style="font-size:14pt">Where $tef$ is the temperature emissions feedback that has a central value of -0.031 based on Woodard et al. (2019).</p>
+
 ##Climate Component
 
 <p style="font-size:14pt">The climate model is based on the DICE model, annualized using formulas from Cai and Lontzek (2019). This is a three box carbon-cycle model (atmopsphere, upper ocean, and lower ocean) that tracks both atmopspheric and ocean temperature. Details are available in: [Cai, Y. and Lontzek, T. S., 2019. "The Social Cost of Carbon with Economic and Climate Risks", Journal of Political Economy, 127 (6), pp.2684-2736](https://www.journals.uchicago.edu/doi/full/10.1086/701890?mobileUi=0#)</p>
 
-<p style="font-size:14pt">The Cai and Lontzek model is initialized in 2005. For the default model run, we re-initialize using carbon mass and radiative balances in 2020 by running the model using global emissions observed 2005-2020. </p>
+<p style="font-size:14pt">The Cai and Lontzek model is initialized in 2005. For the default model run, we re-initialize using carbon mass and radiative balances in 2020 by running the model using global emissions observed 2005-2020. Following the DICE 2016 model,forcing from non-$CO_{2}$ greenhouse gases is parameterized as a single "exogenous forcing" term that is added to forcing from $CO_{2}$. This forcing is scaled using the relationship:
+$$ExF_{t}=ExF_{BAU,t}*(1-0.49*f_{CO2,t})$$
+where $ExF_{t}$ is the exogenous forcing term in time t, $ExF_{BAU,t}$ is the business as usual exogenous forcing term, and $f_{CO2,t}$ is the fractional reduction in $CO_{2}$ emissions below the RCP7 baseline in year t defined as $f_{CO2}= \frac{(BAU_{t}-E_{Tot,t})}{BAU_{t}}$. The $0.49$ scaling term comes from the relationship between reductions in $CO_{2}$ emissions and reductions in $CH_{4}$ and $N_{2}O$ emissions below RCP7 values observed across other RCP-SSP scenarios.</p>
 
 ## Cognition Component
 

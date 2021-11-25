@@ -112,6 +112,10 @@ emissions=read.csv("data/emissions_ssp3_rcp7.csv")
 bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to GtC per year
 bau_outside1=emissions[,4]/1000*12/(12+16+16)
 
+#the temp_emissionsparam parameter controls a feedback on baseline emissions from temperature change
+#by default it is set to zero, but distributions in monte carlo runs are drawn from Woodard, Davis and Randerson 2019, PNAS
+temp_emissionsparam01=0
+
 #more policy increases the contemporaneous effect on emissions and the duration of the effect
 #two parameters describe how the contemporaneous effect changes with policy
 #m_max has a value less than one and describes the maximum fraction of emissions that could be cut instantly by policy
