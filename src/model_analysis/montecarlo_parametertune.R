@@ -327,6 +327,11 @@ bau1=emissions[,3]/1000*12/(12+16+16) #conversion factor from MtCO2 per year to 
 bau_outside1=emissions[,4]/1000*12/(12+16+16)
 ex_forcing1=emissions[,5]
 
+mitigation=data.frame(Year=2020:2100,bau=bau1+bau_outside1)
+mitigation=merge(mitigation,clems)
+mitigation$mit_rate=(mitigation$bau-mitigation$Emissions)/mitigation$bau
+write.csv(mitigation,file="data/mitigationrates.csv")
+
 for(i in 1:length(emissionssplit)){
  
   emissions_dat=emissionssplit[[i]]$Emissions[order(emissionssplit[[i]]$Year)]
