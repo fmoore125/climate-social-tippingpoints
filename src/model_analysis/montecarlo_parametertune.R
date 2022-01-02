@@ -71,8 +71,9 @@ sampleweight=sampleweight/sum(sampleweight) #convert to "probability"
 #plot paremter densities before and after tuning
 densplots=list()
 
-pdf(file="figureS1a.pdf")
-par(mfrow=c(3,3))
+pdf(file="C:/Users/fmoore/Documents/GitHub/climate-social-tippingpoints/writingup/Submissions/Nature Submission/Final Submission/Figures/Extended Data 2.pdf",width=8,height=10.5)
+par(mfrow=c(3,3),mar=c(3.1,4.1,3.1,1))
+layout(matrix(data=c(1,2,3,4,5,6,7,8,9,rep(10,9)),byrow=TRUE,ncol=3))
 
 for(i in 1:dim(params)[2]){
   priordens=density(params[,i])
@@ -81,7 +82,6 @@ for(i in 1:dim(params)[2]){
   lines(x=postdens$x,y=postdens$y,col="#84c3a0",lwd=2)
   if(i==3) legend("topright",legend=c("Prior","Posterior"),lwd=2,col=c("#135678","#84c3a0"),bty="n",cex=1.5)
 }
-dev.off()
 
 #calculate covariance of parameters, weighting by error
 samp=sample(1:nsim,nsim,replace=TRUE,prob=sampleweight)
@@ -91,9 +91,10 @@ diag(postcov)=NA
 postcov[3,2]=NA;postcov[2,3]=NA #weak and strong forces are mechanically correlated
 colnames(postcov)=covparamserror$params;rownames(postcov)=covparamserror$params
 postcov[which(upper.tri(postcov))]=NA
-x11()
+
 par(mar=c(9,9,1,6))
 plot(postcov[-1,-9],axis.col=list(side=1,las=2),axis.row=list(side=2,las=1),xlab="",ylab="",main="",na.col="grey",col=c('#fc8d59','#fee08b','#d9ef8b','#91cf60','#1a9850'))
+dev.off()
 
 params_tot=cbind(params,sampleweight)
 colnames(params_tot)=c(as.character(covparamserror$params),"sampleweight")
@@ -264,8 +265,8 @@ clems$Year=as.numeric(as.character(clems$Year))
 clems=merge(clems,nruns)
 
 #add names of scenarios and order from most to least common
-clems$Cluster=fct_relevel(clems$Cluster, "2","3","1","5","4")
-clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
+clems$Cluster=fct_relevel(clems$Cluster, "2","3","1","4","5")
+clems$Cluster=fct_recode(clems$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Delayed Recognition"="4","Little and Late"="5")
 
 cols=c("#FED789", "#023743", "#72874E", "#476F84", "#A4BED5", "#c42449")
 a=ggplot(clems,aes(x=Year,y=Emissions,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()+theme(text=element_text(size=16))
@@ -283,14 +284,17 @@ clpol$Cluster=as.factor(clpol$Cluster)
 clpol=merge(clpol,nruns)
 clpol$Year=as.numeric(as.character(clpol$Year))
 
-clpol$Cluster=fct_relevel(clpol$Cluster, "2","3","1","5","4")
-clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
+clpol$Cluster=fct_relevel(clpol$Cluster, "2","3","1","4","5")
+clpol$Cluster=fct_recode(clpol$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Delayed Recognition"="4","Little and Late"="5")
 
 b=ggplot(clpol,aes(x=Year,y=Policy,group=Cluster,col=Cluster,lwd=nsims))+geom_line()+theme_bw()
 b=b+scale_color_manual(values=cols)+labs(x="",color="Cluster",lwd="Percent of Runs",y="Climate Policy Stringency")+ theme(legend.position="none",text=element_text(size=16))
 
 x11()
 b+a+plot_layout(ncol=2)
+write.csv(clems,file="writingup/Submissions/Nature Submission/Final Submission/Figures/figure3b_sourcedata.csv")
+write.csv(clpol,file="writingup/Submissions/Nature Submission/Final Submission/Figures/figure3a_sourcedata.csv")
+
 
 #parameter combinations associated with each cluster
 params_cluster=scale(params)
@@ -306,8 +310,8 @@ params_cluster=params_cluster[,-which(colnames(params_cluster)=="Weak.Force")]
 params_cluster=melt(params_cluster,id.var="Cluster")
 params_cluster$Cluster=as.factor(params_cluster$Cluster)
 
-params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "2","3","1","5","4")
-params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="4","Delayed Recognition"="5")
+params_cluster$Cluster=fct_relevel(params_cluster$Cluster, "2","3","1","4","5")
+params_cluster$Cluster=fct_recode(params_cluster$Cluster,"Modal Path"="2","Aggresive Action"="3","Technical Challenges"="1","Little and Late"="5","Delayed Recognition"="4")
 
 #order parameters to group by component
 params_cluster$variable=fct_relevel(params_cluster$variable,"Homophily","Strong.Force","Evidence","Pol.Opinion","CED","Policy-Adoption","ACost_Init","ACost_Steep","Opinion-Adoption","ETC Effect","Social Norm Effect","Status.Quo.Bias","Pol.Int.Feedback","Max Mit. Rate","Max Mit Time","LBD Effect","Lag Time","Temp-Emissions","Adoption Effect","Biased.Assimilation","Shifting.Baselines")

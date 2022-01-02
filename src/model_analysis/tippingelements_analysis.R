@@ -1,6 +1,7 @@
 library(ggplot2)
 library(forcats)
 library(metR)
+library(patchwork)
 #graphs to demonstrate interaction of model tipping points
 
 
@@ -26,18 +27,18 @@ lbd_param=0.2
 adoption_param=seq(0,0.7,by=0.01)
 cred_param=seq(0,0.5,by=0.01)
 
-params=expand.grid(adoption_param,cred_param)
+params_a=expand.grid(adoption_param,cred_param)
 ems_output=numeric()
-for(i in 1:dim(params)[1]){
-  m=model(pbc_opinionchange=c(0,0,-1*params[i,1]),ced_param=params[i,2])
+for(i in 1:dim(params_a)[1]){
+  m=model(pbc_opinionchange=c(0,0,-1*params_a[i,1]),ced_param=params_a[i,2])
   ems_output[i]=m$totalemissions[81] #extract cumulative emissions for 2020-2100
 }
 
-params$emissions=ems_output
-colnames(params)=c("individual_adoption","ced_effect","emissions_2100")
+params_a$emissions=ems_output
+colnames(params_a)=c("individual_adoption","ced_effect","emissions_2100")
 
-a=ggplot(params,aes(x=individual_adoption,y=ced_effect,fill=emissions_2100,z=emissions_2100))+geom_tile()
-a=a+labs(x="Propensity for Individual Action by Climate Policy Supporters",y="Credibility Enhancing Display Effect",fill="2100\nEmissions\n(GtC)")
+a=ggplot(params_a,aes(x=individual_adoption,y=ced_effect,fill=emissions_2100,z=emissions_2100))+geom_tile()
+a=a+labs(x="Propensity for Individual Action by Climate Policy Supporters",y="Credibility Enhancing\nDisplay Effect",fill="2100\nEmissions\n(GtC)")
 a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,text=element_text(size=14))
 a=a+scale_fill_gradient(low="blue",high="tomato3")
 a=a+geom_contour(breaks=c(2,4,6,8,10,12,14,16,18,20,22),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=2,rotate=FALSE)
@@ -59,24 +60,24 @@ lbd_sweep=seq(0,0.25,by=0.005)
 fracsupp_sweep=seq(0.15,0.35,by=0.005)
 sq_sweep=c(1.25,9)
 
-params=expand.grid(lbd_sweep,fracsupp_sweep,sq_sweep)
+params_b=expand.grid(lbd_sweep,fracsupp_sweep,sq_sweep)
 ems_output=numeric()
-for(i in 1:dim(params)[1]){
-  m=model(lbd_param=params[i,1],frac_opp_0=0.5-params[i,2],pol_response=params[i,3])
+for(i in 1:dim(params_b)[1]){
+  m=model(lbd_param=params_b[i,1],frac_opp_0=0.5-params_b[i,2],pol_response=params_b[i,3])
   ems_output[i]=sum(m$totalemissions[1:81])
 }
 
-params$emissions=ems_output
-colnames(params)=c("endogenous_cost","frac_support","status_quo_bias","cumulative_emissions")
-params$status_quo_bias=as.factor(params$status_quo_bias);params$status_quo_bias=fct_recode(params$status_quo_bias,"Low Status-Quo Bias"="1.25","High Status Quo Bias"="9")
+params_b$emissions=ems_output
+colnames(params_b)=c("endogenous_cost","frac_support","status_quo_bias","cumulative_emissions")
+params_b$status_quo_bias=as.factor(params_b$status_quo_bias);params_b$status_quo_bias=fct_recode(params_b$status_quo_bias,"Low Status-Quo Bias"="1.25","High Status Quo Bias"="9")
 
-a=ggplot(params,aes(x=endogenous_cost*100,y=frac_support/0.5,fill=cumulative_emissions,z=cumulative_emissions))+geom_tile()
-a=a+facet_wrap(~status_quo_bias)+labs(x="Endogenous Cost Reductions (% per Doubling)",y="Initial Fraction Climate Policy Supporters",fill="Total Emissions\n2020-2100\n(GtC)")
-a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
-a=a+scale_fill_gradient(low="yellow",high="turquoise3")
-a=a+geom_contour(breaks=seq(600,1400,by=50),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=2,rotate=FALSE)
+b=ggplot(params_b,aes(x=endogenous_cost*100,y=frac_support/0.5,fill=cumulative_emissions,z=cumulative_emissions))+geom_tile()
+b=b+facet_wrap(~status_quo_bias,ncol=1)+labs(x="Endogenous Cost Reductions (% per Doubling)",y="Initial Fraction Climate Policy Supporters",fill="Total Emissions\n2020-2100\n(GtC)")
+b=b+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
+b=b+scale_fill_gradient(low="yellow",high="turquoise3")
+b=b+geom_contour(breaks=seq(600,1400,by=50),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=2,rotate=FALSE)
 x11()
-a
+b
 
 #3. Perception of Climate Change
 source("src/model.R")
@@ -117,10 +118,18 @@ params$opposed=dist_output_con
 colnames(params)=c("biassed_assimilation","evidenceeffect","shiftingbaseline","opposers2050")
 params$shiftingbaseline=as.factor(params$shiftingbaseline);params$shiftingbaseline=fct_recode(params$shiftingbaseline,"Shifting Baseline"="1","Fixed Baseline"="0")
 
-a=ggplot(params,aes(x=biassed_assimilation,y=evidenceeffect,fill=opposers2050*100,z=opposers2050*100))+geom_tile()
-a=a+facet_wrap(~shiftingbaseline)+labs(x="Biased Assmiliation",y="Effect of Perceived Weather on Opinion",fill="Policy Opposers\n2050 (%)")
-a=a+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
-a=a+scale_fill_gradient(low="darkorchid",high="palegreen2")
+c=ggplot(params,aes(x=biassed_assimilation,y=evidenceeffect,fill=opposers2050*100,z=opposers2050*100))+geom_tile()
+c=c+facet_wrap(~shiftingbaseline)+labs(x="Biased Assmiliation",y="Effect of Perceived\nWeather on Opinion",fill="Policy\nOpposers\n2050 (%)")
+c=c+theme_bw()+theme(strip.background =element_rect(fill="white"),legend.title.align = 0.5,legend.box.just = "center",strip.text=element_text(face="bold",size=12),text=element_text(size=14))
+c=c+scale_fill_gradient(low="darkorchid",high="palegreen2")
 #a=a+geom_contour(breaks=seq(2,8,by=0.5),col="black",lwd=0.75)+geom_text_contour(size=6.5,label.placement = label_placement_fraction(),skip=1,rotate=FALSE)
+
 x11()
-a
+
+design <- "
+  12
+  32
+"
+a+b+c+plot_layout(design = design)
+
+
